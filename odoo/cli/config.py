@@ -33,11 +33,10 @@ import glob
 import shutil
 import fnmatch
 
-from odoo import tools
 from odoo.tools import misc
 from odoo.modules.registry import Registry
 from odoo.tools.config import config
-from odoo.tools.translate import PoFileReader
+from odoo.tools.translate import PoFileReader, PoFileWriter, trans_generate
 from . import Command
 
 from odoo.modules.module import get_test_modules
@@ -201,10 +200,52 @@ class Update(ConfigCommand):
         except KeyError:
           pass
         
+
+class PoIgnoreFileWriter(PoFileWriter):
+  def __init__(self, target, modules, lang, ignore):
+    super(PoIgnoreFileWriter, self).__init__(target, modules, lang)
+    self.ignore = ignore
+    
+  def write_rows(self, rows):
+    # we now group the translations by source. That means one translation per source.
+    grouped_rows = {}
+    for module, type, name, res_id, src, trad, comments in rows:
+        row = grouped_rows.setdefault(src, {})
+        row.setdefault('modules', set()).add(module)
+        if not row.get('translation') and trad != src:
+            row['translation'] = trad
+        row.setdefault('tnrs', []).append((type, name, res_id))
+        row.setdefault('comments', set()).update(comments)
+
+    for src, row in sorted(grouped_rows.items()):
+        if not self.lang:
+            # translation template, so no translation value
+            row['translation'] = ''
+        elif not row.get('translation'):
+            row['translation'] = ''
         
+        # check if translations should ignored
+        write_translation = True                
+        if self.ignore:
+          for tnr in row["tnrs"]:
+            comments = row['comments']
+            if not comments:
+              comments = ['']
+            for comment in comments:
+              # type, name, imd_name, src, value, comments
+              key = (tnr[0], tnr[1], str(tnr[2]), src, row['translation'], comment)
+              if key in self.ignore:
+                write_translation = False    
+        
+        if write_translation:
+          self.add_entry(row['modules'], row['tnrs'], src, row['translation'], row['comments'])
+          
+    # buffer expects bytes
+    self.buffer.write(str(self.po).encode())
+        
+             
 class Po_Export(ConfigCommand):
     """ Export *.po File """
-    
     def run_config(self):
         # check module
         if not self.params.module:
@@ -227,30 +268,44 @@ class Po_Export(ConfigCommand):
         # run with env
         self.setup_env()
       
+    def trans_export(self, lang, modules, buffer, cr, ignore):
+      translations = trans_generate(lang, modules, cr)
+      modules = set(t[0] for t in translations)
+      writer = PoIgnoreFileWriter(buffer, modules, lang, ignore)
+      writer.write_rows(translations)
+      del translations
+      
     def run_config_env(self, env):
         # check module installed
-        if not self.env["ir.module.module"].search([("state","=","installed"),("name","=",self.params.module)]) :
+        if not env["ir.module.module"].search([("state","=","installed"),("name","=",self.params.module)]) :
             _logger.error("No module %s installed!" % self.params.module)
             return 
         
-        export_filename = os.path.join(self.langdir, self.langfile)
-        export_f = open(export_filename,"w")
-        try:
+        exportFileName = os.path.join(self.langdir, self.langfile)
+        with open(exportFileName,"wb") as exportStream:
             ignore = None
-            ignore_filename = "%s.ignore" % export_filename
+            ignore_filename = "%s.ignore" % exportFileName
             if os.path.exists(ignore_filename):
               _logger.info("Load ignore file %s" % ignore_filename)
               ignore=set()
-              fileobj = misc.file_open(ignore_filename)
-              reader = PoFileReader(fileobj)
-              for row in reader:
-                if not row[4]:
-                  ignore.add(row)
+              with misc.file_open(ignore_filename, mode="rb") as fileobj:
+                reader = PoFileReader(fileobj)
+                for row in reader:
+                  if not row.get("value"):
+                    # type, name, imd_name, src, value, comments
+                    imd_name = row.get("imd_name")
+                    module = row.get("module") or ""
+                    if imd_name and module and not imd_name.find(".") > 0:
+                      imd_name = "%s.%s" % (module, imd_name)                    
+                    ignore.add((row["type"], 
+                                row["name"],
+                                imd_name,
+                                row["src"],
+                                row["value"],
+                                row["comments"]))
             
-            _logger.info('Writing %s', export_filename)
-            tools.trans_export(self.lang, [self.params.module], export_f, "po", env.cr, ignore=ignore)
-        finally:
-            export_f.close()
+            _logger.info('Writing %s', exportFileName)
+            self.trans_export(self.lang, [self.params.module], exportStream, env.cr, ignore)
 
         
 class Po_Import(Po_Export):
@@ -262,13 +317,13 @@ class Po_Import(Po_Export):
     
     def run_config_env(self, env):
         # check module installed
-        if not self.env["ir.module.module"].search([("state","=","installed"),("name","=",self.params.module)]):
+        if not env["ir.module.module"].search([("state","=","installed"),("name","=",self.params.module)]):
             _logger.error("No module %s installed!" % self.params.module)
             return 
         
-        import_filename = os.path.join(self.langdir, self.langfile)
-        if not os.path.exists(import_filename):
-            _logger.error("File %s does not exist!" % import_filename)
+        importFilename = os.path.join(self.langdir, self.langfile)
+        if not os.path.exists(importFilename):
+            _logger.error("File %s does not exist!" % importFilename)
             return 
         
         # import 
@@ -277,7 +332,7 @@ class Po_Import(Po_Export):
             _logger.info("Overwrite existing translations for %s/%s", self.params.module, self.lang)
             
         cr = env.cr
-        odoo.tools.trans_load(cr, import_filename, self.lang, module_name=self.params.module, context=context)
+        odoo.tools.trans_load(cr, importFilename, self.lang, module_name=self.params.module, context=context)
         cr.commit()  
 
 
