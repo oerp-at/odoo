@@ -146,7 +146,7 @@ class ConfigCommand(Command):
     def run_config(self):
         _logger.info("Nothing to do!")
         
-    def run_config_env(self, local_vars):
+    def run_config_env(self, env):
         _logger.info("Nothing to do!")
         
     def setup_env(self, fct=None):
@@ -466,6 +466,29 @@ class CleanUp(ConfigCommand):
         self.parser.add_argument("--delete-higher", action="store_true", help="Delete Higher Translation")
         self.parser.add_argument("--only-models", action="store_true", help="Delete unused Models")
         self.clean=True
+        self.ignore_modules = set(('timesheet_grid',
+                             'stock_barcode',
+                             'account_accountant',
+                             'mrp_workorder',
+                             'mrp_plm',
+                             'quality_control',
+                             'web_studio',
+                             'helpdesk',
+                             'hr_appraisal',
+                             'payment_sepa_direct_debit',
+                             'project_forecast',
+                             'sale_ebay',
+                             'sale_subscription',
+                             'sign',
+                             'voip',
+                             'website_calendar',
+                             'website_twitter_wall',
+                             'marketing_automation',
+                             'web_mobile'))
+        
+    def run_config(self):
+        # run with env
+        self.setup_env()
     
     def fixable(self, msg):
         self.clean=False
@@ -484,7 +507,7 @@ class CleanUp(ConfigCommand):
         cr.execute("SELECT id, lang, name, res_id, module FROM ir_translation WHERE type='model' ORDER BY lang, module, name, res_id, id")
         refs = {}
         
-        for row in self.cr.fetchall():
+        for row in cr.fetchall():
             # get name an res id
             name = row[2] and row[2].split(",")[0] or None
             res_id = row[3]            
@@ -518,7 +541,7 @@ class CleanUp(ConfigCommand):
         cr.execute("SELECT id, lang, name, res_id, module FROM ir_translation WHERE type='model' ORDER BY lang, module, name, res_id, id")
         last_key = None
         first_id = None
-        for row in self.cr.fetchall():
+        for row in cr.fetchall():
             key = row[1:]
             if last_key and key == last_key:                
                 self.fixable("Double Translation %s for ID %s" % (repr(row), first_id))
@@ -531,7 +554,7 @@ class CleanUp(ConfigCommand):
         cr.execute("SELECT id, lang, name, src, module FROM ir_translation WHERE type='view' AND res_id=0 ORDER BY lang, module, name, src, id")
         last_key = None
         first_id = None
-        for row in self.cr.fetchall():
+        for row in cr.fetchall():
             key = row[1:]
             if last_key and key == last_key:                
                 self.fixable("Double Translation %s for ID %s" % (repr(row), first_id))
@@ -597,14 +620,14 @@ class CleanUp(ConfigCommand):
     def delete_model_data(self, model_data):        
         self.fixable("Delete model_data %s,%s,%s,%s" % (model_data.name, model_data.id, model_data.model, model_data.res_id))
         env = model_data._env
-        model_obj = env.get(model_data.model)
-        if model_obj and model_obj._name != "ir.model":
+        model_obj = env.get(model_data.model, None)
+        if not model_obj is None and model_obj._name != "ir.model":
             self.fixable("Delete %s,%s" % (model_obj._name,model_data.res_id))
             model_obj.browse(model_data.res_id).unlink()
         model_data.unlink()
             
     def delete_module(self, module, full=False):
-        env = module._env
+        env = module.env
         cr = env.cr
         self.deleted_modules[module.id]=module.name
         self.fixable("Delete module %s,%s" % (module.name,module.id))
@@ -625,10 +648,10 @@ class CleanUp(ConfigCommand):
                         " WHERE d.res_id > 0 ")
         
         for oid, model, res_id, name in cr.fetchall():
-            model_obj = env[model]
+            model_obj = env.get(model,None)
             
             deletable = False
-            if not model_obj:                
+            if model_obj is None:                
                 deletable = True
             else:
                 cr.execute("SELECT id FROM %s WHERE id=%s" % (model_obj._table, res_id))
@@ -653,7 +676,7 @@ class CleanUp(ConfigCommand):
         
         for module in env["ir.module.module"].search([]):
             info = odoo.modules.module.load_information_from_description_file(module.name)
-            if not info:             
+            if not info and module.name not in self.ignore_modules:             
               mod_full_delete = module.name in mod_full_delete_set
               mod_delete = module.name in mod_delete_set
               if mod_delete or mod_full_delete:
@@ -676,8 +699,9 @@ class CleanUp(ConfigCommand):
                 
     def cleanup_models(self, env):
         for model in env["ir.model"].search([]):          
-            if not env.get(model.model):
-                self.delete_model(model)
+            model_obj = env.get(model.model, None)
+            if model_obj is None:
+              self.delete_model(model)
         
     def run_config_env(self, env):
         self.deleted_modules = {}
@@ -701,7 +725,10 @@ class CleanUp(ConfigCommand):
                 cr.commit()
                         
             except Exception as e:
-                _logger.error(e)
+                if self.params.debug:
+                  _logger.exception(e)
+                else:
+                  _logger.error(e)
                 return
             finally:
                 cr.rollback()
@@ -718,7 +745,10 @@ class CleanUp(ConfigCommand):
               if self.params.fix:
                   cr.commit()
           except Exception as e:
-              _logger.error(e)
+              if self.params.debug:
+                _logger.exception(e)
+              else:
+                _logger.error(e)
               return
           finally:
               cr.rollback()
