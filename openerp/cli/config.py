@@ -1158,10 +1158,10 @@ class Install(Command):
             addons_added = installed_addons - old_addons
 
             for addon in addons_removed:                
-                _logger.info("Removed Addin: %s" % addon)
+                _logger.info("Removed: %s" % addon)
 
             for addon in addons_added:                
-                _logger.info("Removed Addin: %s" % addon)
+                _logger.info("Added: %s" % addon)
 
             if merged:
                 _logger.info("\n\nMerged:\n * %s\n" % ("\n * ".join(merged),))
