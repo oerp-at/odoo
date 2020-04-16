@@ -1,6 +1,0 @@
-<openerp>
-	<data>
-		<menuitem id="menu_mailforward" name="Mail Forward" parent="posix.menu_posix" sequence="1"
-        		  action="action_mailforward"/>				
-	</data>
-</openerp>

@@ -1,2 +1,0 @@
-import company
-import resource

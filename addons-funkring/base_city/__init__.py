@@ -1,2 +1,0 @@
-import city
-import res_partner

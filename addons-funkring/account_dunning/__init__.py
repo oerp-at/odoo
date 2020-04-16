@@ -1,5 +1,0 @@
-import account_dunning
-import wizard
-import account_reminder
-import account_invoice
-import res_partner

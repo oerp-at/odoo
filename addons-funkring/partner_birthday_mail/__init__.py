@@ -1,1 +1,0 @@
-import partner_birthday_mail

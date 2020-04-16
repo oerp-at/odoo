@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<openerp>
-	<data>
-		<menuitem id="menu_posix_log" name="Log" parent="posix.menu_posix" sequence="31"
-        		  action="action_posix_log"/>
-        <menuitem id="menu_posix_log_alert" name="Alert" parent="posix.menu_posix" sequence="41"
-        		  action="action_posix_log_alert"/>
-	</data>
-</openerp>

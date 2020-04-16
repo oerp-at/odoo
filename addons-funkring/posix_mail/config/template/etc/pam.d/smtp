@@ -1,3 +1,0 @@
-auth        required    pam_pgsql.so
-account     required    pam_pgsql.so
-password    required    pam_pgsql.so
