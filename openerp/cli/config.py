@@ -101,7 +101,7 @@ class ConfigCommand(Command):
                                  **required_or_default("ADDONS",
                                  "colon-separated list of paths to addons"))
                         
-        self.parser.add_argument("--database", metavar="DATABASE",
+        self.parser.add_argument("-d", "--database", metavar="DATABASE",
                                  **required_or_default("DATABASE",
                                 "the database to modify"))
             
