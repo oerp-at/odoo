@@ -137,10 +137,7 @@ class configmanager(object):
                           help="save configuration to ~/.openerp_serverrc")
         group.add_option("-i", "--init", dest="init", help="install one or more modules (comma-separated list, use \"all\" for all modules), requires -d")
         group.add_option("-u", "--update", dest="update",
-                          help="update one or more modules (comma-separated list, use \"all\" for all modules). Requires -d.")
-        #funkring.net begin
-        group.add_option("--cleanup", action="store_true",dest="cleanup",default=False),
-        #funkring.net end
+                          help="update one or more modules (comma-separated list, use \"all\" for all modules). Requires -d.")      
         group.add_option("--without-demo", dest="without_demo",
                           help="disable loading demo data for modules to be installed (comma-separated, use \"all\" for all modules). Requires -d and -i. Default is %default",
                           my_default=False)
@@ -276,13 +273,7 @@ class configmanager(object):
         group.add_option('--load-language', dest="load_language",
                          help="specifies the languages for the translations you want to be loaded")
         group.add_option('-l', "--language", dest="language",
-                         help="specify the language of the translation file. Use it with --i18n-export or --i18n-import")
-        #funkring.net begin
-        group.add_option("--i18n-get",dest="translate_get",action="store_true", my_default=False,
-                         help="Write Translation to module addon directory as po file")
-        group.add_option("--i18n-set", dest="translate_set",action="store_true", my_default=False,
-                         help="Read Translation from module addon directory from po file")
-        #funkring.net end
+                         help="specify the language of the translation file. Use it with --i18n-export or --i18n-import")       
         group.add_option("--i18n-export", dest="translate_out",
                          help="export all sentences to be translated to a CSV file, a PO file or a TGZ archive and exit")
         group.add_option("--i18n-import", dest="translate_in",
@@ -470,7 +461,7 @@ class configmanager(object):
         keys = [
             'language', 'translate_out', 'translate_in', 'overwrite_existing_translations',
             #funkring.net begin
-            'default_language','translate_get', 'translate_set', 'disable_database_manager', 'db_prefix',
+            'default_language', 'disable_database_manager', 'db_prefix',
             'syncdb_url', 'syncdb_user', 'syncdb_password', 'syncdb_public_url', 'ooproxy', 'ooport',
             #funkring.net end
             'debug_mode', 'smtp_ssl', 'load_language',
@@ -502,21 +493,15 @@ class configmanager(object):
                 self.options[arg] = optparse.Option.TYPE_CHECKER[self.casts[arg].type](self.casts[arg], arg, self.options[arg])
         
         self.options['root_path'] = os.path.abspath(os.path.expanduser(os.path.expandvars(os.path.dirname(openerp.__file__))))
-        if not self.options['addons_path'] or self.options['addons_path']=='None':
-            # funkring.net - begin            
-            enabled_addons = os.path.join(self.options['root_path'], '../config/enabled-addons/openerp/addons')
-            if os.path.exists(enabled_addons):
-                self.options['addons_path'] = os.path.abspath(enabled_addons)
-            else:
-                default_addons = []
-                base_addons = os.path.join(self.options['root_path'], 'addons')
-                if os.path.exists(base_addons):
-                    default_addons.append(base_addons)
-                main_addons = os.path.abspath(os.path.join(self.options['root_path'], '../addons'))
-                if os.path.exists(main_addons):
-                    default_addons.append(main_addons)
-                self.options['addons_path'] = ','.join(default_addons)
-            # funkring.net - end
+        if not self.options['addons_path'] or self.options['addons_path']=='None':            
+            default_addons = []
+            base_addons = os.path.join(self.options['root_path'], 'addons')
+            if os.path.exists(base_addons):
+                default_addons.append(base_addons)
+            main_addons = os.path.abspath(os.path.join(self.options['root_path'], '../addons'))
+            if os.path.exists(main_addons):
+                default_addons.append(main_addons)
+            self.options['addons_path'] = ','.join(default_addons)
         else:
             self.options['addons_path'] = ",".join(
                     os.path.abspath(os.path.expanduser(os.path.expandvars(x)))

@@ -32,6 +32,7 @@ import unittest2
 import itertools
 import glob
 import sys
+import fnmatch
 
 from openerp import tools
 from openerp.tools import misc
@@ -1194,8 +1195,7 @@ class Serve(Command):
         )
 
         parser.add_argument('--create', action="store_true", help="Create databse if it not exist")
-        parser.add_argument('--path', default=".",
-            help="Directory where your project's modules are stored (will autodetect from current dir)")        
+        parser.add_argument('--path', help="Directory where your project's modules are stored (will autodetect from current dir)")        
         parser.add_argument("-d", "--database", dest="db_name", default=None,
                          help="Specify the database name (default to project's directory name")
 
@@ -1204,10 +1204,9 @@ class Serve(Command):
         dir_server = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../.."))
         dir_workspace = os.path.abspath(os.path.join(dir_server, ".."))
 
-        dir_workspace = os.path.abspath(os.path.expanduser(os.path.expandvars(args.path)))
-        if dir_workspace == ".":
-            dir_workspace = dir_workspace    
-
+        if args.path:
+            dir_workspace = os.path.abspath(os.path.expanduser(os.path.expandvars(args.path)))
+      
         # get addons paths
         if '--addons-path' not in cmdargs:            
             addon_pattern = [dir_workspace + "/addons*"]
@@ -1220,7 +1219,7 @@ class Serve(Command):
                     
             # add package paths
             if package_paths:
-                cmdargs.append('--addons-path=%s' % ",".join(list(package_paths)))
+                cmdargs.append('--addons-path=%s' % ",".join(package_paths))
         
         if args.db_name or args.create:
             if not args.db_name:
@@ -1244,7 +1243,7 @@ class Serve(Command):
                 (i > 0 and l[i-1] in ['-p', '--path'])
         cmdargs = [v for i, v in enumerate(cmdargs)
                    if not to_remove(i, cmdargs)]
-
+            
         main(cmdargs)
 
 def die(message, code=1):

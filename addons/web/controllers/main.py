@@ -1571,7 +1571,7 @@ class Reports(http.Controller):
         inName = inName.replace(" ","_")
         inName = re.sub("[^a-zA-Z0-9\-_ ,]","",inName)
         return inName
-    #funkring.ent - end
+    #funkring.net - end
 
     @http.route('/web/report', type='http', auth="user")
     @serialize_exception
