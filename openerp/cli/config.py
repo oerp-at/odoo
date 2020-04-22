@@ -1003,11 +1003,15 @@ def linkFile(src, dst):
     os.symlink(src, dst)
 
 
-def linkDirectoryEntries(src, dst, ignore=None):
+def linkDirectoryEntries(src, dst, ignore=None, names=None):
     links = set()
 
     # remove old links
     for name in listDir(dst):
+        if ignore and name in ignore:
+            continue
+        if names and not name in names:
+            continue
         file_path = os.path.join(dst, name)
         if os.path.islink(file_path):
             os.remove(file_path)
@@ -1015,6 +1019,8 @@ def linkDirectoryEntries(src, dst, ignore=None):
     # set new links
     for name in listDir(src):
         if ignore and name in ignore:
+            continue
+        if names and not name in names:
             continue
         src_path = os.path.join(src, name)
         dst_path = os.path.join(dst, name)  
@@ -1089,8 +1095,19 @@ class Install(Command):
 
             odoo_bin = os.path.join(dirServer,"odoo-bin")            
             linkFile(odoo_bin, os.path.join(bin_path,"odoo-bin"))
+            
+            
+            # setup additional libraries
 
-
+            linkDirectoryEntries(dirServer, lib_path, names=[
+                "openerplib",
+                "psycogreen",
+                "pygal",
+                "tinyrest",
+                "aeroolib",
+                "couchdb"
+            ] )
+            
             # setup addons
 
             addonPattern = [dirWorkspace + "/addons*",
