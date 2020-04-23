@@ -52,11 +52,18 @@ from openerp.modules.module import TestStream
 from openerp import SUPERUSER_ID
 
 
-ADDON_API = 8
-
+ADDON_API = openerp.release.version
 
 _logger = logging.getLogger('openerp')
 
+
+def get_python_lib():
+    version = sys.version.split(".")
+    if len(version) >= 2:
+        return "python%s.%s" % (version[0], version[1])
+    elif len(version) == 1:
+        return "python%s.%s" % version[0]
+    return "python%s" % version
 
 def required_or_default(name, h):
     """
@@ -1174,6 +1181,8 @@ class Install(Command):
             installed_addons = getAddonsSet()
             addons_removed = old_addons - installed_addons
             addons_added = installed_addons - old_addons
+            
+            _logger.info("Addon API: %s" % ADDON_API)
 
             for addon in addons_removed:                
                 _logger.info("Removed: %s" % addon)
