@@ -1,27 +1,11 @@
-# -*- coding: utf-8 -*-
-#############################################################################
-#
-#    Copyright (c) 2007 Martin Reisenhofer <martin.reisenhofer@funkring.net>
-#
-#    This program is free software: you can redistribute it and/or modify
-#    it under the terms of the GNU General Public License as published by
-#    the Free Software Foundation, either version 3 of the License, or
-#    (at your option) any later version.
-#
-#    This program is distributed in the hope that it will be useful,
-#    but WITHOUT ANY WARRANTY; without even the implied warranty of
-#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU General Public License for more details.
-#
-#    You should have received a copy of the GNU General Public License
-#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-##############################################################################
-
+# -*- coding: utf-8 -*--
+# © 2017 Funkring.net (Martin Reisenhofer <martin.reisenhofer@funkring.net>)
+# License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 import logging
 import argparse
 import os
+import sys
 import re
 import threading
 import time
@@ -42,13 +26,53 @@ from . import Command
 from odoo.modules.module import get_test_modules
 from odoo.modules.module import OdooTestRunner
 from odoo.modules.module import unwrap_suite
-
+from odoo.modules.module import MANIFEST_NAMES
 
 _logger = logging.getLogger('config')
 
+ADDON_API = odoo.release.version
 
-ADDON_META = "__manifest__.py"
-ADDON_API = 13
+
+def get_python_lib():
+    version = sys.version.split(".")
+    if len(version) >= 2:
+        return "python%s.%s" % (version[0], version[1])
+    elif len(version) == 1:
+        return "python%s.%s" % version[0]
+    return "python%s" % version
+
+def required_or_default(name, h):
+    """
+    Helper to define `argparse` arguments. If the name is the environment,
+    the argument is optional and draw its value from the environment if not
+    supplied on the command-line. If it is not in the environment, make it
+    a mandatory argument.
+    """
+    d = None
+    if os.environ.get("ODOO" + name.upper()):
+        d = {"default": os.environ["ODOO" + name.upper()]}
+    else:
+        # default addon path
+        if name == "ADDONS":
+            virtual_env = os.environ.get("VIRTUAL_ENV")
+            if virtual_env:
+                lib_path = os.path.join(virtual_env,"lib",get_python_lib())                
+                lib_path_odoo = os.path.join(lib_path, "odoo")
+                lib_path_addons = os.path.join(lib_path_odoo, "addons")
+
+                # create directories
+                for dir_path in (lib_path_odoo, lib_path_addons):
+                    if not os.path.exists(dir_path):
+                        _logger.info("Create directory %s" % dir_path)
+                        os.mkdir(dir_path)
+
+                d = {"default": lib_path_addons}
+
+        if not d:
+            d = {"required": True}
+
+    d["help"] = h + ". The environment variable ODOO" + name.upper() + " can be used instead."
+    return d
 
 
 class ConfigCommand(Command):
@@ -60,8 +84,11 @@ class ConfigCommand(Command):
           defaultLang = "de_DE"
       
         self.parser = argparse.ArgumentParser(description="Odoo Config")
-        self.parser.add_argument("--addons-path", metavar="ADDONS",                                 
-                                 help="colon-separated list of paths to addons")
+        self.parser.add_argument(
+            "--addons-path",
+            metavar="ADDONS",
+            **required_or_default("ADDONS", "colon-separated list of paths to addons")
+        )
                         
         self.parser.add_argument("-d","--database", metavar="DATABASE",
                                  help="the database to modify")
@@ -760,127 +787,168 @@ class CleanUp(ConfigCommand):
               _logger.warning("Cleanup necessary")
 
 
-class Link(ConfigCommand):
-    """ Link addons from workspace """
-    
+###############################################################################
+# Setup Utils
+###############################################################################
+
+
+def getDirs(inDir):
+    res = []
+    for dirName in os.listdir(inDir):
+        if not dirName.startswith("."):
+            if os.path.isdir(os.path.join(inDir, dirName)):
+                res.append(dirName)
+
+    return res
+
+
+def listDir(inDir):
+    res = []
+    for item in os.listdir(inDir):
+        if not item.startswith("."):
+            res.append(item)
+    return res
+
+
+def findFile(directory, pattern):
+    for root, dirs, files in os.walk(directory):
+        for basename in files:
+            if fnmatch.fnmatch(basename, pattern):
+                filename = os.path.join(root, basename)
+                yield filename
+
+
+def cleanupPython(directory):
+    for fileName in findFile(directory, "*.pyc"):
+        os.remove(fileName)
+
+
+def linkFile(src, dst):
+    if os.path.exists(dst):
+        if os.path.islink(dst):
+            os.remove(dst)
+    os.symlink(src, dst)
+
+
+def linkDirectoryEntries(src, dst, ignore=None, names=None):
+    links = set()
+
+    # remove old links
+    for name in listDir(dst):
+        if ignore and name in ignore:
+            continue
+        if names and not name in names:
+            continue
+        file_path = os.path.join(dst, name)
+        if os.path.islink(file_path):
+            os.remove(file_path)
+
+    # set new links
+    for name in listDir(src):
+        if ignore and name in ignore:
+            continue
+        if names and not name in names:
+            continue
+        src_path = os.path.join(src, name)
+        dst_path = os.path.join(dst, name)
+        is_dir = os.path.isdir(dst_path)
+        if not name.endswith(".pyc") and not name.startswith("."):
+            os.symlink(src_path, dst_path)
+            links.add(dst_path)
+
+    return links
+
+
+class Install(Command):
+    """ install to environment """
+
     def __init__(self):
-        super(Link, self).__init__()
+        super(Install, self).__init__()
+        self.parser = argparse.ArgumentParser(description="Odoo Config")
         self.parser.add_argument("--cleanup", action="store_true", help="Cleanup links")
-        
-    def run_config(self):
-        
-        version = '%s.0' % ADDON_API
-        dirEnabledAddons = os.path.expanduser('~/.local/share/Odoo/addons/%s' % version)
-        dirServer = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath( __file__ )),"../.."))
-        dirWorkspace = os.path.abspath(os.path.join(dirServer,".."))
-        
+
+    def run(self, args):
+        params = self.parser.parse_args(args)
+
+        logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+
+        virtual_env = os.environ.get("VIRTUAL_ENV")
+        if not virtual_env:
+            _logger.error("Can only executed from virtual environment")
+            return
+
+        lib_path = os.path.join(virtual_env,"lib",get_python_lib())
+        lib_path_odoo = os.path.join(lib_path, "odoo")
+        lib_path_addons = os.path.join(lib_path_odoo, "addons")
+        bin_path = os.path.join(virtual_env, "bin")
+
+        # create directories
+        for dir_path in (lib_path_odoo, lib_path_addons):
+            if not os.path.exists(dir_path):
+                _logger.info("Create directory %s" % dir_path)
+                os.mkdir(dir_path)
+
+        dirServer = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../.."))
+        dirWorkspace = os.path.abspath(os.path.join(dirServer, ".."))
+        dirEnabledAddons = lib_path_addons
+
         ignoreAddons = []
         includeAddons = {
-        #       "addon-path" : [
-        #          "modulexy"
-        #        ]
+            #       "addon-path" : [
+            #          "modulexy"
+            #        ]
         }
-        
-        def getDirs(inDir):
-            res = []
-            for dirName in os.listdir(inDir):
-                if not dirName.startswith("."):
-                    if os.path.isdir(os.path.join(inDir,dirName)):
-                        res.append(dirName)
-        
-            return res
-        
-        def listDir(inDir):
-            res = []
-            for item in os.listdir(inDir):
-                if not item.startswith("."):
-                    res.append(item)
-            return res
-        
-        def getMaintainedModules():
-            addonPattern = [
-              os.path.join(dirWorkspace,"addons*")
-            ]
-        
-            addons = []
-            for curPattern in addonPattern:
-                curDir = os.path.dirname(curPattern)
-                for curAddonPackageDir in glob.glob(curPattern):
-                    curPackagePath = os.path.join(curDir,curAddonPackageDir)
-                    if os.path.isdir(curPackagePath):
-                        for curAddon in listDir(curPackagePath):
-                            enabledPath = os.path.join(dirEnabledAddons, curAddon)
-                            if os.path.exists(enabledPath):
-                                addons.append(curAddon)
-        
+
+        def getAddonsSet():
+            addons = set()
+            for name in getDirs(dirEnabledAddons):
+                addons.add(name)
             return addons
-        
-        def findFile(directory, pattern):
-            for root, dirs, files in os.walk(directory):
-                for basename in files:
-                    if fnmatch.fnmatch(basename, pattern):
-                        filename = os.path.join(root, basename)
-                        yield filename
-        
-        
-        def cleanupPython(directory):
-            for fileName in findFile(directory,"*.pyc"):
-                os.remove(fileName)
-        
-        def setup(onlyLinks=False):
-            #create path if not exists
-            if not os.path.exists(dirEnabledAddons):
-                _logger.info("Create directory %s" % dirEnabledAddons)
-                os.makedirs(dirEnabledAddons)
-                
-            os.chmod(dirEnabledAddons, 0o710)
-        
-            filesToCopy = [
-            ]
-        
-            addonPattern = [
-              dirWorkspace+"/addons*"
-            ]
-        
+
+        def setupAddons(onlyLinks=False):
+            dir_odoo = os.path.join(dirServer, "odoo")
+            dir_odoo_addons = os.path.join(dir_odoo, "addons")
+            old_addons = getAddonsSet()
+
+            # setup odoo libs
+
+            linkDirectoryEntries(dir_odoo, lib_path_odoo, ignore="addons")
+            linkedBaseEntries = linkDirectoryEntries(dir_odoo_addons, lib_path_addons)
+
+            # setup odoo bin
+
+            odoo_bin = os.path.join(dirServer, "odoo-bin")
+            linkFile(odoo_bin, os.path.join(bin_path, "odoo-bin"))
+
+            # setup addons
+
+            addonPattern = [dirWorkspace + "/addons*", os.path.join(dirServer, "addons")]
+
             merged = []
             updateFailed = []
-            
+
             if not onlyLinks:
-              _logger.info("Cleanup all *.pyc Files")
-              cleanupPython(dirWorkspace)
-        
+                _logger.info("Cleanup all *.pyc Files")
+                cleanupPython(dirWorkspace)
+
             if not os.path.exists(dirEnabledAddons):
                 _logger.info("Create directory %s" % str(dirEnabledAddons))
                 os.makedirs(dirEnabledAddons)
-        
-            removedLinks = 0
-            addedLinks = 0
-        
+
             dir_processed = set()
-            dir_removed = set()
-            dir_added = set()
-        
+
             _logger.info("Delete current Symbolic links and distributed files " + str(dirEnabledAddons) + " ...")
-            for curLink in glob.glob(dirEnabledAddons+'/*'):
-                curLinkPath = os.path.join(dirEnabledAddons,curLink)
-                #log.info("Found Link " + str(curLinkPath))
+            for curLink in glob.glob(dirEnabledAddons + "/*"):
+                curLinkPath = os.path.join(dirEnabledAddons, curLink)
                 is_link = os.path.islink(curLinkPath)
-                if is_link: #or os.path.isfile(curLinkPath):
-                    #log.info("Remove link " + str(curLinkPath))
+                if is_link:
+                    # ingore system link
+                    if curLinkPath in linkedBaseEntries:
+                        continue
+                    # remove link
                     os.remove(curLinkPath)
-                    if is_link:
-                        removedLinks+=1
-                        dir_removed.add(os.path.basename(curLink))
-        
-            _logger.info("Distribute Files " + str(dirEnabledAddons) + " ...")
-            for fileToCopy in filesToCopy:
-                fileToCopyPath = os.path.join(dirServer,fileToCopy)
-                if os.path.exists(fileToCopyPath):
-                    fileDestPath = os.path.join(dirEnabledAddons,os.path.basename(fileToCopyPath))
-                    _logger.info("Copy File %s to %s " % (fileToCopyPath,fileDestPath))
-                    shutil.copyfile(fileToCopyPath, fileDestPath)
-        
-            #link per addons basis
+
+            # link per addons basis
             for curPattern in addonPattern:
                 for curAddonPackageDir in glob.glob(curPattern):
                     packageName = os.path.basename(curAddonPackageDir)
@@ -888,50 +956,132 @@ class Link(ConfigCommand):
                         dir_processed.add(curAddonPackageDir)
                         _logger.info("Process: " + curAddonPackageDir)
                         if os.path.isdir(curAddonPackageDir):
-                            #get include list
-                            addonIncludeList = includeAddons.get(packageName,None)
-                            #process addons
+                            # get include list
+                            addonIncludeList = includeAddons.get(packageName, None)
+                            # process addons
                             for curAddon in listDir(curAddonPackageDir):
-                                if not curAddon in ignoreAddons and (addonIncludeList is None or curAddon in addonIncludeList):
+                                if not curAddon in ignoreAddons and (
+                                    addonIncludeList is None or curAddon in addonIncludeList
+                                ):
                                     curAddonPath = os.path.join(curAddonPackageDir, curAddon)
-                                    curAddonPathMeta = os.path.join(curAddonPath, ADDON_META)
-                                    if os.path.exists(curAddonPathMeta):
-                                        addonMeta = None
-                                        with open(curAddonPathMeta) as metaFp:
-                                            addonMeta = eval(metaFp.read())
-                                            
-                                        # check api
-                                        supported_api = addonMeta.get("api")
-                                        if not supported_api or ADDON_API in supported_api:                                     
-                                            dstPath = os.path.join(dirEnabledAddons, curAddon)                            
-                                            if not os.path.exists(dstPath) and not curAddonPath.endswith(".pyc"):
-                                                #log.info("Create addon link " + str(dstPath) + " from " + str(curAddonPath))
-                                                os.symlink(curAddonPath, dstPath, target_is_directory=True)
-                                                addedLinks += 1
-                                                dir_added.add(curAddon)
-        
+                                    for manifest_name in MANIFEST_NAMES:
+                                        curAddonPathMeta = os.path.join(curAddonPath, manifest_name)
+                                        if os.path.exists(curAddonPathMeta):
+                                            addonMeta = None
+                                            with open(curAddonPathMeta) as metaFp:
+                                                addonMeta = eval(metaFp.read())
+
+                                            # check api
+                                            supported_api = addonMeta.get("api")
+                                            if not supported_api or ADDON_API in supported_api:
+                                                dstPath = os.path.join(dirEnabledAddons, curAddon)
+                                                if not os.path.exists(dstPath) and not curAddonPath.endswith(".pyc"):
+                                                    # log.info("Create addon link " + str(dstPath) + " from " + str(curAddonPath))
+                                                    os.symlink(curAddonPath, dstPath)
+
                     else:
-                        #log.info("processed twice: " + curAddonPackageDir)
+                        # log.info("processed twice: " + curAddonPackageDir)
                         pass
-        
-            for cur_dir in dir_removed:
-                if not cur_dir in dir_added:
-                    _logger.info("Removed Addin: " + cur_dir)
-        
-            for cur_dir in dir_added:
-                if not cur_dir in dir_removed:
-                    _logger.info("Addin Added: " + cur_dir)
-        
+
+            installed_addons = getAddonsSet()
+            addons_removed = old_addons - installed_addons
+            addons_added = installed_addons - old_addons
+            
+            _logger.info("Addon API: %s" % ADDON_API)
+
+            for addon in addons_removed:
+                _logger.info("Removed: %s" % addon)
+
+            for addon in addons_added:
+                _logger.info("Added: %s" % addon)
+
             if merged:
                 _logger.info("\n\nMerged:\n * %s\n" % ("\n * ".join(merged),))
-        
+
             if updateFailed:
                 _logger.error("\n\nUnable to update:\n * %s\n" % ("\n * ".join(updateFailed),))
-        
-            _logger.info("Removed links: " + str(removedLinks))
-            _logger.info("Added links: "  + str(addedLinks))
+
+            _logger.info("Removed links: %s" % len(addons_removed))
+            _logger.info("Added links: %s" % len(addons_added))
             _logger.info("Finished!")
-        
-        
-        setup(onlyLinks=not self.params.cleanup)
+
+        setupAddons(onlyLinks=not params.cleanup)
+
+
+###############################################################################
+# Serve
+###############################################################################
+
+class Serve(Command):
+    """Quick start the Odoo server for your project"""
+
+    def get_module_list(self, path):
+        mods = glob.glob(os.path.join(path, "*/%s" % MANIFEST))
+        return [mod.split(os.path.sep)[-2] for mod in mods]
+
+    def run(self, cmdargs):
+        parser = argparse.ArgumentParser(prog="%s start" % sys.argv[0].split(os.path.sep)[-1], description=self.__doc__)
+
+        parser.add_argument("--create", action="store_true", help="Create databse if it not exist")
+        parser.add_argument(
+            "--path", help="Directory where your project's modules are stored (will autodetect from current dir)"
+        )
+        parser.add_argument(
+            "-d",
+            "--database",
+            dest="db_name",
+            default=None,
+            help="Specify the database name (default to project's directory name",
+        )
+
+        args, unknown = parser.parse_known_args(args=cmdargs)
+
+        dir_server = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../.."))
+        dir_workspace = os.path.abspath(os.path.join(dir_server, ".."))
+
+        if args.path:
+            dir_workspace = os.path.abspath(os.path.expanduser(os.path.expandvars(args.path)))
+
+        # get addons paths
+        if "--addons-path" not in cmdargs:
+            addon_pattern = [dir_workspace + "/addons*"]
+            package_paths = set()
+            for cur_pattern in addon_pattern:
+                for package_dir in glob.glob(cur_pattern):
+                    package_name = os.path.basename(package_dir)
+                    if os.path.isdir(package_dir):
+                        package_paths.add(package_dir)
+
+            # add package paths
+            if package_paths:
+                cmdargs.append("--addons-path=%s" % ",".join(package_paths))
+
+        if args.db_name or args.create:
+            if not args.db_name:
+                args.db_name = db_name or project_path.split(os.path.sep)[-1]
+                cmdargs.extend(("-d", args.db_name))
+
+            # TODO: forbid some database names ? eg template1, ...
+            try:
+                _create_empty_database(args.db_name)
+            except DatabaseExists as e:
+                pass
+            except Exception as e:
+                die("Could not create database `%s`. (%s)" % (args.db_name, e))
+
+            if "--db-filter" not in cmdargs:
+                cmdargs.append("--db-filter=^%s$" % args.db_name)
+
+        # Remove --path /-p options from the command arguments
+        def to_remove(i, l):
+            return l[i] == "-p" or l[i].startswith("--path") or (i > 0 and l[i - 1] in ["-p", "--path"])
+
+        cmdargs = [v for i, v in enumerate(cmdargs) if not to_remove(i, cmdargs)]
+
+        main(cmdargs)
+
+
+def die(message, code=1):
+    print >>sys.stderr, message
+    sys.exit(code)
               
