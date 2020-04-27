@@ -34,6 +34,8 @@ import glob
 import sys
 import fnmatch
 
+import ConfigParser
+
 from openerp import tools
 from openerp.tools import misc
 from openerp import api
@@ -109,9 +111,7 @@ class ConfigCommand(Command):
                                  **required_or_default("ADDONS",
                                  "colon-separated list of paths to addons"))
                         
-        self.parser.add_argument("-d", "--database", metavar="DATABASE",
-                                 **required_or_default("DATABASE",
-                                "the database to modify"))
+        self.parser.add_argument("-d", "--database", metavar="DATABASE")
             
         self.parser.add_argument("-m", "--module", metavar="MODULE", required=False)
         self.parser.add_argument("--default-lang",required=False)
@@ -127,6 +127,9 @@ class ConfigCommand(Command):
                             help="specify the database user")
         self.parser.add_argument("--config", metavar="CONFIG", default=False,
                             help="specify the configuration")
+
+        self.parser.add_argument("--db-config", "-dc", metavar="DB_CONFIG", default=False,
+                            help="specify database configuration")
         
         self.parser.add_argument("--debug", action="store_true")
         
@@ -144,10 +147,42 @@ class ConfigCommand(Command):
         
         config_args = []
         
-        if params.database:
-            config_args.append("--database")
-            config_args.append(params.database)
-            
+        default_mapping = {
+            "db_name": "database",
+            "db_host": "db_host",
+            "db_password": "db_password",
+            "db_port": "db_port",
+            "db_user": "db_user"
+        }
+
+        if params.db_config:
+            if os.path.exists(params.db_config):
+                p = ConfigParser.ConfigParser()
+                try:
+                    p.read([params.db_config])
+                    for (name,value) in p.items('options'):
+                        param_name = default_mapping.get(name)
+                        if value and param_name:
+                            if value.lower() == "none":
+                                value = None
+                            if value.lower() == "false":
+                                value = False
+                            if name == "db_port":
+                                value = int(value)
+
+                            # set default
+                            # if is not defined
+                            if value:
+                                if not getattr(params, param_name):
+                                    setattr(params, param_name, value)
+                except IOError:
+                    _logger.error("Unable to read config %s" % params.db_config)
+                except ConfigParser.NoSectionError:
+                    _logger.error("Config %s has no section options" % params.db_config)
+            else:
+                _logger.error("Config %s not found" % params.db_config)
+
+
         if params.module:
             config_args.append("--module")
             config_args.append(params.module)
@@ -159,23 +194,29 @@ class ConfigCommand(Command):
         if params.pg_path:
             config_args.append("--pg_path")
             config_args.append(params.pg_path)
-            
+
+        if params.database:
+            config_args.append("--database")
+            config_args.append(params.database)
+        else:
+            raise NameError("No database specified tue parameter or config file!")
+        
         if params.db_host:
             config_args.append("--db_host")
             config_args.append(params.db_host)
-            
+        
         if params.db_password:
             config_args.append("--db_password")
             config_args.append(params.db_password)
-            
+        
         if params.db_port:
             config_args.append("--db_port")
             config_args.append(params.db_port)
-            
+        
         if params.db_user:
             config_args.append("--db_user")
             config_args.append(params.db_user)
-            
+        
         if params.addons_path:
             config_args.append("--addons-path")
             config_args.append(params.addons_path)
@@ -247,8 +288,8 @@ class Update(ConfigCommand):
             try:            
                 cr.execute("select matviewname from pg_matviews")
                 for (matview,) in cr.fetchall():
-                  _logger.info("refresh MATERIALIZED VIEW %s ..." % matview)
-                  cr.execute("REFRESH MATERIALIZED VIEW %s" % matview)
+                    _logger.info("refresh MATERIALIZED VIEW %s ..." % matview)
+                    cr.execute("REFRESH MATERIALIZED VIEW %s" % matview)
                 cr.commit()
                 _logger.info("finished refreshing views")
             finally:
