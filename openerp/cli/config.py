@@ -1141,8 +1141,14 @@ class Install(Command):
 
             # setup odoo bin
 
-            odoo_bin = os.path.join(dirServer,"odoo-bin")            
+            odoo_bin = os.path.join(dirServer,"odoo-bin")    
             linkFile(odoo_bin, os.path.join(bin_path,"odoo-bin"))
+
+
+            # setup sitecustomize 
+
+            sitecustomize = os.path.join(dirServer,"sitecustomize.py")    
+            linkFile(sitecustomize, os.path.join(lib_path,"sitecustomize.py"))
             
             
             # setup additional libraries
