@@ -42,11 +42,86 @@ import urllib2
 import urllib
 import random
 import StringIO
+import simplejson
+import time
+import os
+import base64
+from urlparse import urlparse    
 
 _logger = logging.getLogger(__name__)
 
 def _getChildLogger(logger, subname):
     return logging.getLogger(logger.name + "." + subname)
+
+POLLING_DELAY = 0.25
+
+# EXCEPTION
+
+class ClientException(Exception):
+    def __init__(self, error):
+      super(ClientException, self).__init__(error)
+
+
+# JSON HELPER
+   
+def json_req(url, params):
+    data = {
+      "jsonrpc": "2.0",
+      "params" : params,
+      "id": random.randint(0, 1000000000),
+    }
+    req = urllib2.Request(url=url, data=json.dumps(data), headers={
+        "Content-Type":"application/json",
+    })
+    result = urllib2.urlopen(req)
+    result = json.load(result)
+    if result.get("error", None):
+        raise JsonRPCException(result["error"])
+    return result["result"]
+    
+def json_rpc(url, fct_name, params):
+    data = {
+        "jsonrpc": "2.0",
+        "method": fct_name,
+        "params": params,
+        "id": random.randint(0, 1000000000),
+    }
+    req = urllib2.Request(url=url, data=json.dumps(data), headers={
+        "Content-Type":"application/json",
+    })
+    result = urllib2.urlopen(req)
+    result = json.load(result)
+    if result.get("error", None):
+        raise JsonRPCException(result["error"])
+    return result["result"]
+
+def json_dump(v):
+    return simplejson.dumps(v, separators=(',', ':'))
+
+
+# HELPER
+
+def printPdf(data, printer=None, context=None):
+    fd = None
+    if printer:
+        fd = os.popen("lp -d " + printer,"wb")
+    else:
+        fd = os.popen("lp","wb")
+
+    if fd:
+        fd.write(data)
+        fd.close()
+
+
+def printPdfBase64(data, printer=None, context=None):
+    if data:
+        data = base64.decodestring(data)
+        printPdf(data, printer=printer, context=context)
+
+
+                
+
+# LIB
 
 class Connector(object):
     """
@@ -116,10 +191,10 @@ class XmlRPCSConnector(XmlRPCConnector):
         self.url = 'https://%s:%d/xmlrpc' % (hostname, port)
 
 class JsonRPCException(Exception):
-    def __init__(self, error):
-        self.error = error
-    def __str__(self):
-        return repr(self.error)
+    def __init__(self, error):      
+      super(JsonRPCException, self).__init__(json.dumps(error, indent=4))
+      self.error = error
+    
 
 class ChangeIterator(object):
     def __init__(self, protocol, hostname, port, session_id, models, timeout):
@@ -168,36 +243,31 @@ class ChangeIterator(object):
         #nothing to parse
         return None
     
-def json_req(url, params):
-    data = {
-      "jsonrpc": "2.0",
-      "params" : params,
-      "id": random.randint(0, 1000000000),
-    }
-    req = urllib2.Request(url=url, data=json.dumps(data), headers={
-        "Content-Type":"application/json",
-    })
-    result = urllib2.urlopen(req)
-    result = json.load(result)
-    if result.get("error", None):
-        raise JsonRPCException(result["error"])
-    return result["result"]
+
+class MessageIterator(object):
+    def __init__(self, con, channels, last=0):
+        protocol = "http"
+        if con.connector.protocol.endswith("s"):
+            protocol = "https"
+        self.message_url = "%s://%s:%d/longpolling/poll" % (protocol, con.connector.host, con.connector.port)
+        self.channels = channels
+        self.last = last
+            
+    def __iter__(self):
+        return self
     
-def json_rpc(url, fct_name, params):
-    data = {
-        "jsonrpc": "2.0",
-        "method": fct_name,
-        "params": params,
-        "id": random.randint(0, 1000000000),
-    }
-    req = urllib2.Request(url=url, data=json.dumps(data), headers={
-        "Content-Type":"application/json",
-    })
-    result = urllib2.urlopen(req)
-    result = json.load(result)
-    if result.get("error", None):
-        raise JsonRPCException(result["error"])
-    return result["result"]
+    def __next__(self):
+        res = self.next()
+        if res is None:
+            raise StopIteration
+        return res
+    
+    def next(self):
+        messages = json_rpc(self.message_url, "call", {"channels": self.channels, "last":self.last})
+        for message in messages:
+            self.last = max(self.last, message["id"])        
+        return messages
+    
 
 class JsonRPCConnector(Connector):
     """
@@ -295,6 +365,12 @@ class Connection(object):
         self.set_login_info(database, login, password, user_id)
         self.user_context = None
         self.session_id = None
+        
+        protocol = "http"
+        if self.connector.protocol.endswith("s"):
+            protocol = "https"
+            
+        self.message_url = "%s://%s:%d/longpolling/poll" % (protocol, self.connector.host, self.connector.port)
 
     def set_login_info(self, database, login, password, user_id=None):
         """
@@ -378,6 +454,35 @@ class Connection(object):
         self.check_login(False)
         return self.connector.get_changes(self.get_session_id(), models, timeout)
     
+    def get_messages(self, channels, last=0):
+        return MessageIterator(self, channels, last=last)
+    
+    def get_report(self, name, ids, datas=None, context=None):
+        if not datas:
+            datas = {}
+            
+        report_svc = self.get_service("report")
+        report_id =  report_svc.report(self.database,
+                                         self.user_id,
+                                         self.password,
+                                         name, 
+                                         ids, 
+                                         datas, 
+                                         context)
+        
+        res = None
+        while True:
+            res = report_svc.report_get(self.database, 
+                                                 self.user_id,
+                                                 self.password,
+                                                 report_id)
+            if res["state"]:
+                break
+            
+            time.sleep(POLLING_DELAY)
+        
+        return res         
+    
     def info(self, msg):
         self.__logger.log(logging.INFO, msg)
     
@@ -454,6 +559,7 @@ class Model(object):
         records = self.read(record_ids, fields or [], context or {})
         return records
 
+
 def get_connector(hostname=None, protocol="xmlrpc", port="auto"):
     """
     A shortcut method to easily create a connector to a remote server using XMLRPC.
@@ -476,7 +582,8 @@ def get_connector(hostname=None, protocol="xmlrpc", port="auto"):
         raise ValueError("You must choose xmlrpc, xmlrpcs, jsonrpc or jsonrpcs")
 
 def get_connection(hostname=None, protocol="xmlrpc", port='auto', database=None,
-                 login=None, password=None, user_id=None):
+                 login=None, password=None, user_id=None, url=None):
+  
     """
     A shortcut method to easily create a connection to a remote OpenERP server.
 
@@ -488,7 +595,45 @@ def get_connection(hostname=None, protocol="xmlrpc", port='auto', database=None,
     :param login: The login of the user.
     :param password: The password of the user.
     :param user_id: The user id is a number identifying the user. This is only useful if you
+    :param url: one url which contain all the data e.g. https://user:password@erp.sunhill-technologies.com:8072/database
     already know it, in most cases you don't need to specify it.
     """
-    return Connection(get_connector(hostname, protocol, port), database, login, password, user_id)
+    
+    if url:      
+      purl = urlparse(url)
+      port = None
+      if purl.scheme == "http":
+        protocol = "jsonrpc"
+        port = 80
+      elif purl.scheme == "https":
+        protocol = "jsonrpcs"
+        port = 443
         
+      hostname = purl.hostname
+      port = port or purl.port
+      
+      login = urllib.url2pathname(purl.username or "")
+      if not login:
+        raise ClientException("no username")
+      
+      database = purl.path[1:]
+      if not database:
+        raise ClientException("no database")
+      
+      password = urllib.url2pathname(purl.password or "")
+      if not password:
+        import keyring
+        password = keyring.get_password(database, login)
+      
+    return Connection(get_connector(hostname, protocol, port), database, login, password, user_id)
+
+def add_args(parser):
+    parser.add_argument("url", help="url to odoo server and database e.g. https://user:password@erp.sunhill-technologies.com:8072/database")
+  
+def parse_args(args=None):
+    if not args:
+      import argparse
+      parser = argparse.ArgumentParser(description="Odoo Client")
+      add_args(parser)    
+      args = parser.parse_args()
+    return get_connection(url=args.url)
