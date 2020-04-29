@@ -82,6 +82,7 @@ def required_or_default(name, h):
         if name=="ADDONS":
             virtual_env = os.environ.get('VIRTUAL_ENV')
             if virtual_env:
+<<<<<<< Updated upstream
                 lib_path = os.path.dirname(inspect.getfile(os))
                 lib_path_openerp = os.path.join(lib_path, "openerp")
                 lib_path_addons = os.path.join(lib_path_openerp, "addons")
@@ -94,6 +95,23 @@ def required_or_default(name, h):
                 
                 d = {"default" : lib_path_addons }
                                 
+=======
+                dir_server = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../.."))
+                dir_workspace = os.path.abspath(os.path.join(dir_server, ".."))
+
+                addon_pattern = [dir_workspace + "/addons*"]
+                package_paths = set() 
+                for cur_pattern in addon_pattern:
+                    for package_dir in glob.glob(cur_pattern):
+                        package_name = os.path.basename(package_dir)
+                        if os.path.isdir(package_dir):
+                            package_paths.add(package_dir)
+                            
+                # add package paths
+                if package_paths:
+                    d = {"default" : ",".join(package_paths) }
+                                                
+>>>>>>> Stashed changes
         if not d:
             d = {"required": True}
             
