@@ -80,43 +80,27 @@ def required_or_default(name, h):
     else:
         # default addon path
         if name=="ADDONS":
-            virtual_env = os.environ.get('VIRTUAL_ENV')
-            if virtual_env:
-<<<<<<< Updated upstream
-                lib_path = os.path.dirname(inspect.getfile(os))
-                lib_path_openerp = os.path.join(lib_path, "openerp")
-                lib_path_addons = os.path.join(lib_path_openerp, "addons")
+            dir_server = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../.."))
+            dir_workspace = os.path.abspath(os.path.join(dir_server, ".."))
 
-                # create directories
-                for dir_path in (lib_path_openerp, lib_path_addons):
-                    if not os.path.exists(dir_path):
-                        _logger.info("Create directory %s" % dir_path)
-                        os.mkdir(dir_path)
-                
-                d = {"default" : lib_path_addons }
-                                
-=======
-                dir_server = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../.."))
-                dir_workspace = os.path.abspath(os.path.join(dir_server, ".."))
-
-                addon_pattern = [dir_workspace + "/addons*"]
-                package_paths = set() 
-                for cur_pattern in addon_pattern:
-                    for package_dir in glob.glob(cur_pattern):
-                        package_name = os.path.basename(package_dir)
-                        if os.path.isdir(package_dir):
-                            package_paths.add(package_dir)
-                            
-                # add package paths
-                if package_paths:
-                    d = {"default" : ",".join(package_paths) }
-                                                
->>>>>>> Stashed changes
+            addon_pattern = [dir_workspace + "/addons*"]
+            package_paths = set() 
+            for cur_pattern in addon_pattern:
+                for package_dir in glob.glob(cur_pattern):
+                    package_name = os.path.basename(package_dir)
+                    if os.path.isdir(package_dir):
+                        package_paths.add(package_dir)
+                        
+            # add package paths
+            if package_paths:
+                d = {"default" : ",".join(package_paths) }
+                        
         if not d:
             d = {"required": True}
             
     d["help"] = h + ". The environment variable ODOO" + \
                 name.upper() + " can be used instead."
+                
     return d
 
 
