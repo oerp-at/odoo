@@ -34,6 +34,8 @@ import glob
 import sys
 import fnmatch
 
+import ConfigParser
+
 from openerp import tools
 from openerp.tools import misc
 from openerp import api
@@ -51,9 +53,8 @@ from openerp.modules.module import get_test_modules
 from openerp.modules.module import TestStream
 from openerp import SUPERUSER_ID
 
-_logger = logging.getLogger("openerp")
-
 ADDON_API = openerp.release.version
+_logger = logging.getLogger("openerp")
 
 
 def get_python_lib():
@@ -63,6 +64,7 @@ def get_python_lib():
     elif len(version) == 1:
         return "python%s.%s" % version[0]
     return "python%s" % version
+
 
 def required_or_default(name, h):
     """
@@ -77,19 +79,20 @@ def required_or_default(name, h):
     else:
         # default addon path
         if name == "ADDONS":
-            virtual_env = os.environ.get("VIRTUAL_ENV")
-            if virtual_env:
-                lib_path = os.path.dirname(inspect.getfile(os))
-                lib_path_openerp = os.path.join(lib_path, "openerp")
-                lib_path_addons = os.path.join(lib_path_openerp, "addons")
+            dir_server = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../.."))
+            dir_workspace = os.path.abspath(os.path.join(dir_server, ".."))
 
-                # create directories
-                for dir_path in (lib_path_openerp, lib_path_addons):
-                    if not os.path.exists(dir_path):
-                        _logger.info("Create directory %s" % dir_path)
-                        os.mkdir(dir_path)
+            addon_pattern = [dir_workspace + "/addons*"]
+            package_paths = set()
+            for cur_pattern in addon_pattern:
+                for package_dir in glob.glob(cur_pattern):
+                    package_name = os.path.basename(package_dir)
+                    if os.path.isdir(package_dir):
+                        package_paths.add(package_dir)
 
-                d = {"default": lib_path_addons}
+            # add package paths
+            if package_paths:
+                d = {"default": ",".join(package_paths)}
 
         if not d:
             d = {"required": True}
@@ -109,9 +112,7 @@ class ConfigCommand(Command):
             **required_or_default("ADDONS", "colon-separated list of paths to addons")
         )
 
-        self.parser.add_argument(
-            "-d", "--database", metavar="DATABASE", **required_or_default("DATABASE", "the database to modify")
-        )
+        self.parser.add_argument("-d", "--database", metavar="DATABASE")
 
         self.parser.add_argument("-m", "--module", metavar="MODULE", required=False)
         self.parser.add_argument("--default-lang", required=False)
@@ -127,6 +128,10 @@ class ConfigCommand(Command):
         self.parser.add_argument("--db_user", metavar="DB_USER", default=False, help="specify the database user")
         self.parser.add_argument("--config", metavar="CONFIG", default=False, help="specify the configuration")
 
+        self.parser.add_argument(
+            "--db-config", "-dc", metavar="DB_CONFIG", default=False, help="specify database configuration"
+        )
+
         self.parser.add_argument("--debug", action="store_true")
 
         self.parser.add_argument("--lang", required=False, help="Language (Default is %s)" % config.defaultLang)
@@ -140,9 +145,40 @@ class ConfigCommand(Command):
 
         config_args = []
 
-        if params.database:
-            config_args.append("--database")
-            config_args.append(params.database)
+        default_mapping = {
+            "db_name": "database",
+            "db_host": "db_host",
+            "db_password": "db_password",
+            "db_port": "db_port",
+            "db_user": "db_user",
+        }
+
+        if params.db_config:
+            if os.path.exists(params.db_config):
+                p = ConfigParser.ConfigParser()
+                try:
+                    p.read([params.db_config])
+                    for (name, value) in p.items("options"):
+                        param_name = default_mapping.get(name)
+                        if value and param_name:
+                            if value.lower() == "none":
+                                value = None
+                            if value.lower() == "false":
+                                value = False
+                            if name == "db_port":
+                                value = int(value)
+
+                            # set default
+                            # if is not defined
+                            if value:
+                                if not getattr(params, param_name):
+                                    setattr(params, param_name, value)
+                except IOError:
+                    _logger.error("Unable to read config %s" % params.db_config)
+                except ConfigParser.NoSectionError:
+                    _logger.error("Config %s has no section options" % params.db_config)
+            else:
+                _logger.error("Config %s not found" % params.db_config)
 
         if params.module:
             config_args.append("--module")
@@ -155,6 +191,12 @@ class ConfigCommand(Command):
         if params.pg_path:
             config_args.append("--pg_path")
             config_args.append(params.pg_path)
+
+        if params.database:
+            config_args.append("--database")
+            config_args.append(params.database)
+        else:
+            raise NameError("No database specified tue parameter or config file!")
 
         if params.db_host:
             config_args.append("--db_host")
@@ -395,6 +437,7 @@ class Test(ConfigCommand):
             required=False,
             help="Specify test download diretory (e.g. for reports)",
         )
+        self.parser.add_argument("--test-log", metavar="TEST_LOG", required=False, help="Specify test log file")
 
     def run_config(self):
         dirServer = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../.."))
@@ -416,7 +459,7 @@ class Test(ConfigCommand):
 
             config["test_download"] = test_dir
         
-        _logger.info("Test directory: %s" % config["test_download"])
+        _logger.info("Test directory: %s" % config["test_download"])        
  
         # run with env
         self.setup_env()
@@ -489,27 +532,36 @@ class Test(ConfigCommand):
         return r
 
     def run_config_env(self):
-        module_name = self.params.module
+        if self.params.test_log:
+            _logger.info("Log to file %s" % self.params.test_log)
+            fh = logging.FileHandler(self.params.test_log)
+            fh.setLevel(logging.INFO)
+            formatter = logging.Formatter('%(asctime)s - %(message)s')
+            fh.setFormatter(formatter)            
+            logging.getLogger().addHandler(fh)
+
         test_prefix = self.params.test_prefix
         test_case = self.params.test_case
         cr = self.cr
-
+        
         if self.params.module:
-            modules = [self.params.module]
+            modules = [m.strip() for m in self.params.module.split(",")]
         else:
             cr.execute("SELECT name from ir_module_module WHERE state = 'installed' ")
             modules = [name for (name,) in cr.fetchall()]
 
         if modules:
-            ok = True
             for module_name in modules:
-                ok = self.run_test(module_name, test_prefix, test_case) and ok
-            if ok:
-                _logger.info("Finished!")
-            else:
-                _logger.info("Failed!")
+                ok = self.run_test(module_name, test_prefix, test_case)
+                if not ok:
+                    _logger.info("Failed!")
+                    return False
+
+            _logger.info("Finished!")
         else:
             _logger.warning("No Tests!")
+
+        return True
 
 
 class CleanUp(ConfigCommand):
@@ -1023,6 +1075,7 @@ class Console(ConfigCommand):
 # Setup Utils
 ###############################################################################
 
+
 def getDirs(inDir):
     res = []
     for dirName in os.listdir(inDir):
@@ -1108,7 +1161,7 @@ class Install(Command):
             _logger.error("Can only executed from virtual environment")
             return
 
-        lib_path = os.path.dirname(inspect.getfile(os))
+        lib_path = os.path.join(virtual_env, "lib", "python2.7")
         lib_path_openerp = os.path.join(lib_path, "openerp")
         lib_path_addons = os.path.join(lib_path_openerp, "addons")
         bin_path = os.path.join(virtual_env, "bin")
@@ -1150,6 +1203,11 @@ class Install(Command):
 
             odoo_bin = os.path.join(dirServer, "odoo-bin")
             linkFile(odoo_bin, os.path.join(bin_path, "odoo-bin"))
+
+            # setup sitecustomize
+
+            sitecustomize = os.path.join(dirServer, "sitecustomize.py")
+            linkFile(sitecustomize, os.path.join(lib_path, "sitecustomize.py"))
 
             # setup additional libraries
 
@@ -1222,7 +1280,7 @@ class Install(Command):
             installed_addons = getAddonsSet()
             addons_removed = old_addons - installed_addons
             addons_added = installed_addons - old_addons
-            
+
             _logger.info("Addon API: %s" % ADDON_API)
 
             for addon in addons_removed:
@@ -1247,6 +1305,7 @@ class Install(Command):
 ###############################################################################
 # Serve
 ###############################################################################
+
 
 class Serve(Command):
     """Quick start the Odoo server for your project"""
@@ -1298,12 +1357,13 @@ class Serve(Command):
                 cmdargs.extend(("-d", args.db_name))
 
             # TODO: forbid some database names ? eg template1, ...
-            try:
-                _create_empty_database(args.db_name)
-            except DatabaseExists, e:
-                pass
-            except Exception, e:
-                die("Could not create database `%s`. (%s)" % (args.db_name, e))
+            if args.create:
+                try:
+                    _create_empty_database(args.db_name)
+                except DatabaseExists, e:
+                    pass
+                except Exception, e:
+                    die("Could not create database `%s`. (%s)" % (args.db_name, e))
 
             if "--db-filter" not in cmdargs:
                 cmdargs.append("--db-filter=^%s$" % args.db_name)
