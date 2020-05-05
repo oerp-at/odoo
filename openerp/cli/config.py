@@ -44,17 +44,16 @@ from openerp.modules.registry import RegistryManager
 from . import Command
 from .server import main
 
-from openerp.modules.module import get_module_root, MANIFEST
+from openerp.modules.module import MANIFEST
 from openerp.service.db import _create_empty_database, DatabaseExists
 
 from openerp.modules.module import get_test_modules
 from openerp.modules.module import TestStream
 from openerp import SUPERUSER_ID
 
+_logger = logging.getLogger("openerp")
 
 ADDON_API = openerp.release.version
-
-_logger = logging.getLogger("openerp")
 
 
 def get_python_lib():
@@ -1024,7 +1023,6 @@ class Console(ConfigCommand):
 # Setup Utils
 ###############################################################################
 
-
 def getDirs(inDir):
     res = []
     for dirName in os.listdir(inDir):
@@ -1249,7 +1247,6 @@ class Install(Command):
 ###############################################################################
 # Serve
 ###############################################################################
-
 
 class Serve(Command):
     """Quick start the Odoo server for your project"""
