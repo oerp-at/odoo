@@ -46,16 +46,14 @@ from openerp.modules.registry import RegistryManager
 from . import Command
 from .server import main
 
-from openerp.modules.module import get_module_root, MANIFEST
+from openerp.modules.module import MANIFEST
 from openerp.service.db import _create_empty_database, DatabaseExists
 
 from openerp.modules.module import get_test_modules
 from openerp.modules.module import TestStream
 from openerp import SUPERUSER_ID
 
-
 ADDON_API = openerp.release.version
-
 _logger = logging.getLogger("openerp")
 
 
@@ -100,7 +98,6 @@ def required_or_default(name, h):
             d = {"required": True}
 
     d["help"] = h + ". The environment variable ODOO" + name.upper() + " can be used instead."
-
     return d
 
 
@@ -443,9 +440,27 @@ class Test(ConfigCommand):
         self.parser.add_argument("--test-log", metavar="TEST_LOG", required=False, help="Specify test log file")
 
     def run_config(self):
+        dirServer = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../.."))
+        dirWorkspace = os.path.abspath(os.path.join(dirServer, ".."))
+        
         config["testing"] = True
         if self.params.test_download:
             config["test_download"] = self.params.test_download
+        else:
+            temp_dir = os.path.join(dirWorkspace,"temp")
+            if not os.path.exists(temp_dir):
+                _logger.info("Create temp directory %s" % temp_dir)
+                os.mkdir(temp_dir)
+
+            test_dir = os.path.join(temp_dir, "test")
+            if not os.path.exists(test_dir):
+                _logger.info("Create test directory %s" % test_dir)
+                os.mkdir(test_dir)
+
+            config["test_download"] = test_dir
+        
+        _logger.info("Test directory: %s" % config["test_download"])        
+ 
         # run with env
         self.setup_env()
 
