@@ -1553,7 +1553,7 @@ class Reports(http.Controller):
     }
     
     #funkring.net - begin
-    def _cleanFileName(self, inName):
+    def _clean_file_name(self, inName):
         repl_map = {
                 "Ö" : "Oe",
                 "Ü" : "Ue",
@@ -1624,7 +1624,7 @@ class Reports(http.Controller):
         report_name = report_struct.get("name")
         if report_name:
             file_name = '%s %s' % (file_name, report_name)
-        file_name = self._cleanFileName(file_name)
+        file_name = self._clean_file_name(file_name)
         # funkring.net - end
         file_name = '%s.%s' % (file_name, report_struct['format'])
         return request.make_response(report,
