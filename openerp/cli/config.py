@@ -85,8 +85,7 @@ def required_or_default(name, h):
             addon_pattern = [dir_workspace + "/addons*"]
             package_paths = set()
             for cur_pattern in addon_pattern:
-                for package_dir in glob.glob(cur_pattern):
-                    package_name = os.path.basename(package_dir)
+                for package_dir in glob.glob(cur_pattern):                    
                     if os.path.isdir(package_dir):
                         package_paths.add(package_dir)
 
@@ -1265,13 +1264,10 @@ class Install(Command):
                                         with open(curAddonPathMeta) as metaFp:
                                             addonMeta = eval(metaFp.read())
 
-                                        # check api
-                                        supported_api = addonMeta.get("api")
-                                        if not supported_api or ADDON_API in supported_api:
-                                            dstPath = os.path.join(dirEnabledAddons, curAddon)
-                                            if not os.path.exists(dstPath) and not curAddonPath.endswith(".pyc"):
-                                                # log.info("Create addon link " + str(dstPath) + " from " + str(curAddonPath))
-                                                os.symlink(curAddonPath, dstPath)
+                                        dstPath = os.path.join(dirEnabledAddons, curAddon)
+                                        if not os.path.exists(dstPath) and not curAddonPath.endswith(".pyc"):
+                                            # log.info("Create addon link " + str(dstPath) + " from " + str(curAddonPath))
+                                            os.symlink(curAddonPath, dstPath)
 
                     else:
                         # log.info("processed twice: " + curAddonPackageDir)
