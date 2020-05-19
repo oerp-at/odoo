@@ -133,11 +133,11 @@ class ConfigCommand(Command):
 
         self.parser.add_argument("--debug", action="store_true")
 
-        self.parser.add_argument("--lang", required=False, help="Language (Default is %s)" % config.defaultLang)
+        self.parser.add_argument("--lang", required=False, help="language (Default is %s)" % config.defaultLang)
 
-        self.parser.add_argument("--reinit", metavar="REINIT", default=False, help="(Re)Init Views no or full")
+        self.parser.add_argument("--reinit", metavar="REINIT", default="no", help="(re)init materialized views yes for reinit or full for reinit and rebuild")
 
-        self.parser.add_argument("--test-enable", action="store_true", help="Run Tests")
+        self.parser.add_argument("--test-enable", action="store_true", help="run tests")
 
     def run(self, args):
         params = self.parser.parse_args(args)
