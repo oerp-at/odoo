@@ -273,7 +273,7 @@ class Update(ConfigCommand):
         # set reinit to no 
         # if it was not provided     
         if not self.params.reinit:
-            config["reinit"] = "no"            
+            config["reinit"] = "no"
 
         if self.params.module:
             config["update"][self.params.module] = 1
