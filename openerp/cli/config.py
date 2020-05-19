@@ -135,7 +135,7 @@ class ConfigCommand(Command):
 
         self.parser.add_argument("--lang", required=False, help="language (Default is %s)" % config.defaultLang)
 
-        self.parser.add_argument("--reinit", metavar="REINIT", default="no", help="(re)init materialized views yes for reinit or full for reinit and rebuild")
+        self.parser.add_argument("--reinit", metavar="REINIT", default=False, help="(re)init materialized views, yes for reinit or full for reinit and rebuild")
 
         self.parser.add_argument("--test-enable", action="store_true", help="run tests")
 
@@ -269,7 +269,12 @@ class ConfigCommand(Command):
 class Update(ConfigCommand):
     """ Update Module/All """
 
-    def run_config(self):
+    def run_config(self):  
+        # set reinit to no 
+        # if it was not provided     
+        if not self.params.reinit:
+            config["reinit"] = "no"            
+
         if self.params.module:
             config["update"][self.params.module] = 1
         else:
