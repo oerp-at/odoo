@@ -1826,8 +1826,7 @@ class account_tax_code(osv.osv):
     _constraints = [
         (_check_recursion, 'Error!\nYou cannot create recursive accounts.', ['parent_id'])
     ]
-    _order = 'code'
-
+    
 
 def get_precision_tax():
     def change_digit_tax(cr):
