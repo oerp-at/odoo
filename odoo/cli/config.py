@@ -21,7 +21,9 @@ from odoo.tools import misc
 from odoo.modules.registry import Registry
 from odoo.tools.config import config
 from odoo.tools.translate import PoFileReader, PoFileWriter, trans_generate
+
 from . import Command
+from . server import main
 
 from odoo.modules.module import get_test_modules
 from odoo.modules.module import OdooTestRunner
@@ -54,20 +56,20 @@ def required_or_default(name, h):
     else:
         # default addon path
         if name == "ADDONS":
-            virtual_env = os.environ.get("VIRTUAL_ENV")
-            if virtual_env:
-                lib_path = os.path.join(virtual_env,"lib",get_python_lib())                
-                lib_path_odoo = os.path.join(lib_path, "odoo")
-                lib_path_addons = os.path.join(lib_path_odoo, "addons")
+            dir_server = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../.."))
+            dir_workspace = os.path.abspath(os.path.join(dir_server, ".."))
 
-                # create directories
-                for dir_path in (lib_path_odoo, lib_path_addons):
-                    if not os.path.exists(dir_path):
-                        _logger.info("Create directory %s" % dir_path)
-                        os.mkdir(dir_path)
+            addon_pattern = [dir_workspace + "/addons*"]
+            package_paths = set()
+            for cur_pattern in addon_pattern:
+                for package_dir in glob.glob(cur_pattern):                    
+                    if os.path.isdir(package_dir):
+                        package_paths.add(package_dir)
 
-                d = {"default": lib_path_addons}
-
+            # add package paths
+            if package_paths:
+                d = {"default": ",".join(package_paths)}
+          
         if not d:
             d = {"required": True}
 
@@ -87,25 +89,27 @@ class ConfigCommand(Command):
         self.parser.add_argument(
             "--addons-path",
             metavar="ADDONS",
-            **required_or_default("ADDONS", "colon-separated list of paths to addons")
+            **required_or_default("ADDONS", "Colon-separated list of paths to addons")
         )
                         
         self.parser.add_argument("-d","--database", metavar="DATABASE",
-                                 help="the database to modify")
+                                 help="The database to modify")
             
         self.parser.add_argument("-m", "--module", metavar="MODULE", required=False)
         
-        self.parser.add_argument("--pg_path", metavar="PG_PATH", help="specify the pg executable path")    
+        self.parser.add_argument("--pg_path", metavar="PG_PATH", help="Specify the pg executable path")    
         self.parser.add_argument("--db_host", metavar="DB_HOST", default=False,
                              help="specify the database host")
         self.parser.add_argument("--db_password", metavar="DB_PASSWORD", default=False,
-                             help="specify the database password")
+                             help="Specify the database password")
         self.parser.add_argument("--db_port", metavar="DB_PORT", default=False,
-                             help="specify the database port", type=int)
+                             help="Specify the database port", type=int)
         self.parser.add_argument("--db_user", metavar="DB_USER", default=False,
-                            help="specify the database user")
+                            help="Specify the database user")
         self.parser.add_argument("--config", metavar="CONFIG", default=False,
-                            help="specify the configuration")
+                            help="Specify the configuration")
+        self.parser.add_argument("--db-config", "-dc", metavar="DB_CONFIG", default=False, 
+                            help="Specify database configuration")
         
         self.parser.add_argument("--debug", action="store_true")
         
@@ -113,18 +117,51 @@ class ConfigCommand(Command):
                                  help="Language (Default is %s)" % defaultLang, 
                                  default=defaultLang)
         
-        self.parser.add_argument("--reinit", metavar="REINIT", default=False,
-                            help="(Re)Init Views no or full")
+        self.parser.add_argument("--reinit", metavar="REINIT", default=False, help="(Re)init materialized views, yes for reinit or full for reinit and rebuild")
+
+        self.parser.add_argument("--test-enable", action="store_true", help="Run tests")
         
         
     def run(self, args):  
         params = self.parser.parse_args(args)
         
         config_args = []
-        
-        if params.database:
-            config_args.append("--database")
-            config_args.append(params.database)
+
+        default_mapping = {
+            "db_name": "database",
+            "db_host": "db_host",
+            "db_password": "db_password",
+            "db_port": "db_port",
+            "db_user": "db_user",
+        }
+
+        if params.db_config:
+            if os.path.exists(params.db_config):
+                p = ConfigParser.ConfigParser()
+                try:
+                    p.read([params.db_config])
+                    for (name, value) in p.items("options"):
+                        param_name = default_mapping.get(name)
+                        if value and param_name:
+                            if value.lower() == "none":
+                                value = None
+                            if value.lower() == "false":
+                                value = False
+                            if name == "db_port":
+                                value = int(value)
+
+                            # set default
+                            # if is not defined
+                            if value:
+                                if not getattr(params, param_name):
+                                    setattr(params, param_name, value)
+                except IOError:
+                    _logger.error("Unable to read config %s" % params.db_config)
+                except ConfigParser.NoSectionError:
+                    _logger.error("Config %s has no section options" % params.db_config)
+            else:
+                _logger.error("Config %s not found" % params.db_config)
+
             
         if params.module:
             config_args.append("--module")
@@ -133,6 +170,12 @@ class ConfigCommand(Command):
         if params.pg_path:
             config_args.append("--pg_path")
             config_args.append(params.pg_path)
+
+        if params.database:
+            config_args.append("--database")
+            config_args.append(params.database)
+        else:
+            raise NameError("No database specified tue parameter or config file!")
             
         if params.db_host:
             config_args.append("--db_host")
@@ -207,6 +250,11 @@ class Update(ConfigCommand):
     """ Update Module/All """
 
     def run_config(self):
+        # set reinit to no 
+        # if it was not provided     
+        if not self.params.reinit:
+            config["reinit"] = "no"
+
         if self.params.module:
             config["update"][self.params.module]=1
         else:
@@ -1062,12 +1110,13 @@ class Serve(Command):
                 cmdargs.extend(("-d", args.db_name))
 
             # TODO: forbid some database names ? eg template1, ...
-            try:
-                _create_empty_database(args.db_name)
-            except DatabaseExists as e:
-                pass
-            except Exception as e:
-                die("Could not create database `%s`. (%s)" % (args.db_name, e))
+            if args.create:
+                try:
+                    _create_empty_database(args.db_name)
+                except DatabaseExists as e:
+                    pass
+                except Exception as e:
+                    die("Could not create database `%s`. (%s)" % (args.db_name, e))
 
             if "--db-filter" not in cmdargs:
                 cmdargs.append("--db-filter=^%s$" % args.db_name)
