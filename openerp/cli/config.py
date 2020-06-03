@@ -312,6 +312,11 @@ class Update(ConfigCommand):
             if value:
                 params.append("%s='%s'" % (name2, value))
 
+        add_param("db_host","host")
+        add_param("db_user","user")
+        add_param("db_password","password")
+        add_param("db_port","port")
+
         params = " ".join(params)
         con = psycopg2.connect(params)
         try:
