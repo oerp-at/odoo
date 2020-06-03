@@ -33,6 +33,9 @@ import itertools
 import glob
 import sys
 import fnmatch
+import psycopg2
+
+from multiprocessing import Pool
 
 import ConfigParser
 
@@ -44,7 +47,7 @@ from openerp.tools.translate import TinyPoFile
 from openerp.modules.registry import RegistryManager
 
 from . import Command
-from .server import main
+from . server import main
 
 from openerp.modules.module import MANIFEST
 from openerp.service.db import _create_empty_database, DatabaseExists
@@ -125,6 +128,7 @@ class ConfigCommand(Command):
             "--db_port", metavar="DB_PORT", default=False, help="specify the database port", type=int
         )
         self.parser.add_argument("--db_user", metavar="DB_USER", default=False, help="specify the database user")
+        self.parser.add_argument("--db_prefix", metavar="DB_PREFIX", default=False, help="specify database prefix")
         self.parser.add_argument("--config", metavar="CONFIG", default=False, help="specify the configuration")
 
         self.parser.add_argument(
@@ -150,6 +154,7 @@ class ConfigCommand(Command):
             "db_password": "db_password",
             "db_port": "db_port",
             "db_user": "db_user",
+            "db_prefix": "db_prefix"
         }
 
         if params.db_config:
@@ -194,8 +199,8 @@ class ConfigCommand(Command):
         if params.database:
             config_args.append("--database")
             config_args.append(params.database)
-        else:
-            raise NameError("No database specified tue parameter or config file!")
+        elif not params.db_prefix:
+            raise NameError("No database specified with parameter or config file!")
 
         if params.db_host:
             config_args.append("--db_host")
@@ -232,7 +237,7 @@ class ConfigCommand(Command):
 
         if params.reinit:
             config["reinit"] = params.reinit
-
+        
         self.params = params
         self.run_config()
 
@@ -266,9 +271,59 @@ class ConfigCommand(Command):
             self.cr.close()
 
 
+
+def update_database(database):
+    registry = RegistryManager.get(database, update_module=True)
+    # refresh
+    try:
+        if config["reinit"] == "full":
+            cr = registry.cursor()
+            try:
+                cr.execute("select matviewname from pg_matviews")
+                for (matview,) in cr.fetchall():
+                    _logger.info("refresh MATERIALIZED VIEW %s ..." % matview)
+                    cr.execute("REFRESH MATERIALIZED VIEW %s" % matview)
+                cr.commit()
+                _logger.info("finished refreshing views")
+            finally:
+                cr.close()
+
+    except KeyError:
+        pass
+
+
 class Update(ConfigCommand):
     """ Update Module/All """
+    
+    def __init__(self):
+        super(Update, self).__init__()
+        self.parser.add_argument(
+            "--db-all", action="store_true", default=False, help="Update all databases which match the defined prefix"
+        )
+        self.parser.add_argument(
+            "--threads", metavar="THREADS", default=32, help="Number of threads for multi database update"
+        )
 
+    def get_databases(self):
+        # get databases
+        params = ["dbname='postgres'"]
+        def add_param(name, name2):
+            value = config.get(name)
+            if value:
+                params.append("%s='%s'" % (name2, value))
+
+        params = " ".join(params)
+        con = psycopg2.connect(params)
+        try:
+            cr = con.cursor()
+            try:                
+                cr.execute("SELECT datname FROM pg_database WHERE datname LIKE '%s_%%'" % self.params.db_prefix)
+                return [r[0] for r in cr.fetchall()]
+            finally:
+                cr.close()
+        finally:
+            con.close()
+    
     def run_config(self):  
         # set reinit to no 
         # if it was not provided     
@@ -279,26 +334,21 @@ class Update(ConfigCommand):
             config["update"][self.params.module] = 1
         else:
             config["update"]["all"] = 1
+                
+        if self.params.db_all:
 
-        registry = RegistryManager.get(self.params.database, update_module=True)
+            if not self.params.db_prefix:
+                _logger.error("For multi database update you need to specify the --db_prefix parameter")
+                return
 
-        # refresh
-        try:
-            if config["reinit"] == "full":
-                cr = registry.cursor()
-                try:
-                    cr.execute("select matviewname from pg_matviews")
-                    for (matview,) in cr.fetchall():
-                        _logger.info("refresh MATERIALIZED VIEW %s ..." % matview)
-                        cr.execute("REFRESH MATERIALIZED VIEW %s" % matview)
-                    cr.commit()
-                    _logger.info("finished refreshing views")
-                finally:
-                    cr.close()
+            _logger.info("Create thread pool (%s) for update" % self.params.threads)
 
-        except KeyError:
-            pass
+            pool = Pool(processes=self.params.threads)
+            pool.map(update_database, self.get_databases())
 
+        else:
+            update_database(self.params.database)
+            
 
 class Po_Export(ConfigCommand):
     """ Export *.po File """
