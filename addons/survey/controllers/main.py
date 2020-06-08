@@ -174,6 +174,7 @@ class Survey(http.Controller):
                 partner=answer_sudo.partner_id,
                 email=answer_sudo.email,
                 invite_token=answer_sudo.invite_token,
+                test_entry=answer_sudo.test_entry,
                 **self._prepare_retry_additional_values(answer_sudo)
             )
         except:
@@ -411,9 +412,9 @@ class Survey(http.Controller):
                     answer_tag = "%s_%s" % (survey_sudo.id, question.id)
                     request.env['survey.user_input_line'].sudo().save_lines(answer_sudo.id, question, post, answer_tag)
 
+            go_back = False
             vals = {}
             if answer_sudo.is_time_limit_reached or survey_sudo.questions_layout == 'one_page':
-                go_back = False
                 answer_sudo._mark_done()
             elif 'button_submit' in post:
                 go_back = post['button_submit'] == 'previous'

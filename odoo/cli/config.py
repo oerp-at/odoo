@@ -11,6 +11,8 @@ import threading
 import time
 import unittest
 import locale
+import psycopg2
+from multiprocessing import Pool
 
 import odoo
 import glob
@@ -106,6 +108,8 @@ class ConfigCommand(Command):
                              help="Specify the database port", type=int)
         self.parser.add_argument("--db_user", metavar="DB_USER", default=False,
                             help="Specify the database user")
+        self.parser.add_argument("--db_prefix", metavar="DB_PREFIX", default=False, 
+                            help="specify database prefix")
         self.parser.add_argument("--config", metavar="CONFIG", default=False,
                             help="Specify the configuration")
         self.parser.add_argument("--db-config", "-dc", metavar="DB_CONFIG", default=False, 
@@ -133,6 +137,7 @@ class ConfigCommand(Command):
             "db_password": "db_password",
             "db_port": "db_port",
             "db_user": "db_user",
+            "db_prefix": "db_prefix"
         }
 
         if params.db_config:
@@ -174,7 +179,7 @@ class ConfigCommand(Command):
         if params.database:
             config_args.append("--database")
             config_args.append(params.database)
-        else:
+        elif not params.db_prefix:
             raise NameError("No database specified tue parameter or config file!")
             
         if params.db_host:
@@ -244,10 +249,63 @@ class ConfigCommand(Command):
                       cr.rollback()
             else:
                 self.run_config() 
-        
+
+
+def update_database(database):
+    registry = Registry.new(database, update_module=True)
+            
+    # refresh
+    try:
+        if config["reinit"] == "full":
+            with registry.cursor() as cr:
+                cr.execute("SELECT matviewname FROM pg_matviews")
+                
+                for (matview,) in cr.fetchall():
+                    _logger.info("REFRESH MATERIALIZED VIEW %s ..." % matview)
+                    cr.execute("REFRESH MATERIALIZED VIEW %s" % matview)
+                    cr.commit()                    
+
+                _logger.info("Finished refreshing views")
+    except KeyError:
+        pass
+
 
 class Update(ConfigCommand):
     """ Update Module/All """
+
+    def __init__(self):
+        super(Update, self).__init__()
+        self.parser.add_argument(
+            "--db-all", action="store_true", default=False, help="Update all databases which match the defined prefix"
+        )
+        self.parser.add_argument(
+            "--threads", metavar="THREADS", default=32, help="Number of threads for multi database update"
+        )
+
+    def get_databases(self):
+        # get databases
+        params = ["dbname='postgres'"]
+        def add_param(name, name2):
+            value = config.get(name)
+            if value:
+                params.append("%s='%s'" % (name2, value))
+
+        add_param("db_host","host")
+        add_param("db_user","user")
+        add_param("db_password","password")
+        add_param("db_port","port")
+
+        params = " ".join(params)
+        con = psycopg2.connect(params)
+        try:
+            cr = con.cursor()
+            try:                
+                cr.execute("SELECT datname FROM pg_database WHERE datname LIKE '%s_%%'" % self.params.db_prefix)
+                return [r[0] for r in cr.fetchall()]
+            finally:
+                cr.close()
+        finally:
+            con.close()
 
     def run_config(self):
         # set reinit to no 
@@ -260,20 +318,19 @@ class Update(ConfigCommand):
         else:
             config["update"]["all"]=1
             
-        registry = Registry.new(self.params.database, update_module=True)
-                
-        # refresh
-        try:
-          if config["reinit"] == "full":
-            with registry.cursor() as cr:
-              cr.execute("select matviewname from pg_matviews")
-              for (matview,) in cr.fetchall():
-                _logger.info("refresh MATERIALIZED VIEW %s ..." % matview)
-                cr.execute("REFRESH MATERIALIZED VIEW %s" % matview)
-              cr.commit()
-              _logger.info("finished refreshing views")
-        except KeyError:
-          pass
+        if self.params.db_all:
+
+            if not self.params.db_prefix:
+                _logger.error("For multi database update you need to specify the --db_prefix parameter")
+                return
+
+            _logger.info("Create thread pool (%s) for update" % self.params.threads)
+
+            pool = Pool(processes=self.params.threads)
+            pool.map(update_database, self.get_databases())
+
+        else:
+            update_database(self.params.database)
         
 
 class PoIgnoreFileWriter(PoFileWriter):

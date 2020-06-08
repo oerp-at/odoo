@@ -3,7 +3,7 @@
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
-from odoo.tools import float_round
+from odoo.tools import float_round, float_compare
 
 from itertools import groupby
 
@@ -85,8 +85,6 @@ class MrpBom(models.Model):
             for bom_line in bom.bom_line_ids:
                 if bom.product_id and bom_line.product_id == bom.product_id:
                     raise ValidationError(_("BoM line product %s should not be the same as BoM product.") % bom.display_name)
-                if bom_line.product_tmpl_id == bom.product_tmpl_id:
-                    raise ValidationError(_("BoM line product %s should not be the same as BoM product.") % bom.display_name)
                 if bom.product_id and bom_line.bom_product_template_attribute_value_ids:
                     raise ValidationError(_("BoM cannot concern product %s and have a line with attributes (%s) at the same time.")
                         % (bom.product_id.display_name, ", ".join([ptav.display_name for ptav in bom_line.bom_product_template_attribute_value_ids])))
@@ -120,6 +118,21 @@ class MrpBom(models.Model):
     def onchange_routing_id(self):
         for line in self.bom_line_ids:
             line.operation_id = False
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super().create(vals_list)
+        for bom in res:
+            if float_compare(bom.product_qty, 0, precision_rounding=bom.product_uom_id.rounding) <= 0:
+                raise UserError(_('The quantity to produce must be positive!'))
+        return res
+
+    def write(self, values):
+        res = super().write(values)
+        for bom in self:
+            if float_compare(bom.product_qty, 0, precision_rounding=bom.product_uom_id.rounding) <= 0:
+                raise UserError(_('The quantity to produce must be positive!'))
+        return res
 
     @api.model
     def name_create(self, name):
@@ -307,8 +320,7 @@ class MrpBomLine(models.Model):
             else:
                 line.child_bom_id = self.env['mrp.bom']._bom_find(
                     product_tmpl=line.product_id.product_tmpl_id,
-                    product=line.product_id,
-                    picking_type=line.bom_id.picking_type_id)
+                    product=line.product_id)
 
     @api.depends('product_id')
     def _compute_attachments_count(self):
@@ -323,7 +335,7 @@ class MrpBomLine(models.Model):
     def _compute_child_line_ids(self):
         """ If the BOM line refers to a BOM, return the ids of the child BOM lines """
         for line in self:
-            line.child_line_ids = line.child_bom_id.bom_line_ids.ids
+            line.child_line_ids = line.child_bom_id.bom_line_ids.ids or False
 
     @api.onchange('product_uom_id')
     def onchange_product_uom_id(self):
@@ -356,6 +368,8 @@ class MrpBomLine(models.Model):
         them has to be found on the variant.
         """
         self.ensure_one()
+        if product._name == 'product.template':
+            return False
         if self.bom_product_template_attribute_value_ids:
             for ptal, iter_ptav in groupby(self.bom_product_template_attribute_value_ids.sorted('attribute_line_id'), lambda ptav: ptav.attribute_line_id):
                 if not any([ptav in product.product_template_attribute_value_ids for ptav in iter_ptav]):

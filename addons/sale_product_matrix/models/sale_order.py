@@ -96,6 +96,9 @@ class SaleOrder(models.Model):
                     if not default_so_line_vals:
                         OrderLine = self.env['sale.order.line']
                         default_so_line_vals = OrderLine.default_get(OrderLine._fields.keys())
+                    last_sequence = self.order_line[-1:].sequence
+                    if last_sequence:
+                        default_so_line_vals['sequence'] = last_sequence + 1
                     new_lines.append((0, 0, dict(
                         default_so_line_vals,
                         product_id=product.id,
@@ -106,6 +109,8 @@ class SaleOrder(models.Model):
                 self.update(dict(order_line=new_lines))
                 for line in self.order_line.filtered(lambda line: line.product_template_id == product_template):
                     line.product_id_change()
+                    line._onchange_discount()
+                    
 
     def _get_matrix(self, product_template):
         """Return the matrix of the given product, updated with current SOLines quantities.

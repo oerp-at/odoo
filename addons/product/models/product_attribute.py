@@ -91,7 +91,7 @@ class ProductAttributeValue(models.Model):
         help="The attribute cannot be changed once the value is used on at least one product.")
 
     pav_attribute_line_ids = fields.Many2many('product.template.attribute.line', string="Lines",
-        relation='product_attribute_value_product_template_attribute_line_rel')
+        relation='product_attribute_value_product_template_attribute_line_rel', copy=False)
     is_used_on_products = fields.Boolean('Used on Products', compute='_compute_is_used_on_products')
 
     _sql_constraints = [
@@ -247,6 +247,7 @@ class ProductTemplateAttributeLine(models.Model):
             values['value_ids'] = [(5, 0, 0)]
         res = super(ProductTemplateAttributeLine, self).write(values)
         if 'active' in values:
+            self.flush()
             self.env['product.template'].invalidate_cache(fnames=['attribute_line_ids'])
         # If coming from `create`, no need to update the values and the variants
         # before all lines are created.
@@ -472,7 +473,7 @@ class ProductTemplateAttributeValue(models.Model):
         for ptav in self:
             try:
                 with self.env.cr.savepoint(), tools.mute_logger('odoo.sql_db'):
-                    super(ProductTemplateAttributeLine, ptav).unlink()
+                    super(ProductTemplateAttributeValue, ptav).unlink()
             except Exception:
                 # We catch all kind of exceptions to be sure that the operation
                 # doesn't fail.

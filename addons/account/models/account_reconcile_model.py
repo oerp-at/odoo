@@ -462,7 +462,7 @@ class AccountReconcileModel(models.Model):
         for rule in self:
             # N.B: 'communication_flag' is there to distinguish invoice matching through the number/reference
             # (higher priority) from invoice matching using the partner (lower priority).
-            query = '''
+            query = r'''
             SELECT
                 %s                                  AS sequence,
                 %s                                  AS model_id,
@@ -480,22 +480,22 @@ class AccountReconcileModel(models.Model):
                 (
                     aml.name IS NOT NULL
                     AND
-                    TRIM(REGEXP_REPLACE(aml.name, '[^0-9|^\s]', '', 'g')) != ''
+                    substring(REGEXP_REPLACE(aml.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*') != ''
                     AND
-                        regexp_split_to_array(TRIM(REGEXP_REPLACE(aml.name, '[^0-9|^\s]', '', 'g')),'\s+')
-                        && regexp_split_to_array(TRIM(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g')), '\s+')
+                        regexp_split_to_array(substring(REGEXP_REPLACE(aml.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'),'\s+')
+                        && regexp_split_to_array(substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
                 )
                 OR
-                    regexp_split_to_array(TRIM(REGEXP_REPLACE(move.name, '[^0-9|^\s]', '', 'g')),'\s+')
-                    && regexp_split_to_array(TRIM(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g')), '\s+')
+                    regexp_split_to_array(substring(REGEXP_REPLACE(move.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'),'\s+')
+                    && regexp_split_to_array(substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
                 OR
                 (
                     move.ref IS NOT NULL
                     AND
-                    TRIM(REGEXP_REPLACE(move.ref, '[^0-9|^\s]', '', 'g')) != ''
+                    substring(REGEXP_REPLACE(move.ref, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*') != ''
                     AND
-                        regexp_split_to_array(TRIM(REGEXP_REPLACE(move.ref, '[^0-9|^\s]', '', 'g')),'\s+')
-                        && regexp_split_to_array(TRIM(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g')), '\s+')
+                        regexp_split_to_array(substring(REGEXP_REPLACE(move.ref, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'),'\s+')
+                        && regexp_split_to_array(substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
                 )                                   AS communication_flag,
                 -- Determine a matching or not with the statement line communication using the move.invoice_payment_ref.
                 (
@@ -539,28 +539,28 @@ class AccountReconcileModel(models.Model):
                     (
                         line_partner.partner_id = 0
                         AND
-                        TRIM(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g')) != ''
+                        substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*') != ''
                         AND
                         (
                             (
                                 aml.name IS NOT NULL
                                 AND
-                                TRIM(REGEXP_REPLACE(aml.name, '[^0-9|^\s]', '', 'g')) != ''
+                                substring(REGEXP_REPLACE(aml.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*') != ''
                                 AND
-                                    regexp_split_to_array(TRIM(REGEXP_REPLACE(aml.name, '[^0-9|^\s]', '', 'g')),'\s+')
-                                    && regexp_split_to_array(TRIM(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g')), '\s+')
+                                    regexp_split_to_array(substring(REGEXP_REPLACE(aml.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'),'\s+')
+                                    && regexp_split_to_array(substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
                             )
                             OR
-                                regexp_split_to_array(TRIM(REGEXP_REPLACE(move.name, '[^0-9|^\s]', '', 'g')),'\s+')
-                                && regexp_split_to_array(TRIM(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g')), '\s+')
+                                regexp_split_to_array(substring(REGEXP_REPLACE(move.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'),'\s+')
+                                && regexp_split_to_array(substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
                             OR
                             (
                                 move.ref IS NOT NULL
                                 AND
-                                TRIM(REGEXP_REPLACE(move.ref, '[^0-9|^\s]', '', 'g')) != ''
+                                substring(REGEXP_REPLACE(move.ref, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*') != ''
                                 AND
-                                    regexp_split_to_array(TRIM(REGEXP_REPLACE(move.ref, '[^0-9|^\s]', '', 'g')),'\s+')
-                                    && regexp_split_to_array(TRIM(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g')), '\s+')
+                                    regexp_split_to_array(substring(REGEXP_REPLACE(move.ref, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'),'\s+')
+                                    && regexp_split_to_array(substring(REGEXP_REPLACE(st_line.name, '[^0-9|^\s]', '', 'g'), '\S(?:.*\S)*'), '\s+')
                             )
                             OR
                             (
@@ -659,23 +659,30 @@ class AccountReconcileModel(models.Model):
             return False
 
         # Match total residual amount.
+        line_residual = statement_line.currency_id and statement_line.amount_currency or statement_line.amount
+        line_currency = statement_line.currency_id or statement_line.journal_id.currency_id or statement_line.company_id.currency_id
         total_residual = 0.0
         for aml in candidates:
             if aml['account_internal_type'] == 'liquidity':
-                total_residual += aml['aml_currency_id'] and aml['aml_amount_currency'] or aml['aml_balance']
+                partial_residual = aml['aml_currency_id'] and aml['aml_amount_currency'] or aml['aml_balance']
             else:
-                total_residual += aml['aml_currency_id'] and aml['aml_amount_residual_currency'] or aml['aml_amount_residual']
-        line_residual = statement_line.currency_id and statement_line.amount_currency or statement_line.amount
-        line_currency = statement_line.currency_id or statement_line.journal_id.currency_id or statement_line.company_id.currency_id
+                partial_residual = aml['aml_currency_id'] and aml['aml_amount_residual_currency'] or aml['aml_amount_residual']
+            partial_currency = aml['aml_currency_id'] and self.env['res.currency'].browse(aml['aml_currency_id']) or self.company_id.currency_id
+            if partial_currency != line_currency:
+                partial_residual = partial_currency._convert(partial_residual, line_currency, self.company_id, aml['aml_date_maturity'])
+            total_residual += partial_residual
 
         # Statement line amount is equal to the total residual.
         if float_is_zero(total_residual - line_residual, precision_rounding=line_currency.rounding):
             return True
 
-        if line_residual > total_residual:
-            amount_percentage = (total_residual / line_residual) * 100
+        line_residual_to_compare = line_residual if line_residual > 0.0 else -line_residual
+        total_residual_to_compare = total_residual if line_residual > 0.0 else -total_residual
+
+        if line_residual_to_compare > total_residual_to_compare:
+            amount_percentage = (total_residual_to_compare / line_residual_to_compare) * 100
         elif total_residual:
-            amount_percentage = (line_residual / total_residual) * 100 if total_residual else 0
+            amount_percentage = (line_residual_to_compare / total_residual_to_compare) * 100 if total_residual_to_compare else 0.0
         else:
             return False
         return amount_percentage >= self.match_total_amount_param

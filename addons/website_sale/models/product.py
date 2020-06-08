@@ -54,7 +54,7 @@ class ProductPricelist(models.Model):
 
     def write(self, data):
         res = super(ProductPricelist, self).write(data)
-        if data.keys() & {'code', 'active', 'website_id', 'selectable'}:
+        if data.keys() & {'code', 'active', 'website_id', 'selectable', 'company_id'}:
             self._check_website_pricelist()
         self.clear_cache()
         return res
@@ -65,8 +65,8 @@ class ProductPricelist(models.Model):
         self.clear_cache()
         return res
 
-    def _get_partner_pricelist_multi_search_domain_hook(self):
-        domain = super(ProductPricelist, self)._get_partner_pricelist_multi_search_domain_hook()
+    def _get_partner_pricelist_multi_search_domain_hook(self, company_id):
+        domain = super(ProductPricelist, self)._get_partner_pricelist_multi_search_domain_hook(company_id)
         website = ir_http.get_request_website()
         if website:
             domain += self._get_website_pricelists_domain(website.id)
@@ -179,20 +179,21 @@ class ProductTemplate(models.Model):
     _inherit = ["product.template", "website.seo.metadata", 'website.published.multi.mixin', 'rating.mixin']
     _name = 'product.template'
     _mail_post_access = 'read'
+    _check_company_auto = True
 
     website_description = fields.Html('Description for the website', sanitize_attributes=False, translate=html_translate)
     alternative_product_ids = fields.Many2many(
-        'product.template', 'product_alternative_rel', 'src_id', 'dest_id',
+        'product.template', 'product_alternative_rel', 'src_id', 'dest_id', check_company=True,
         string='Alternative Products', help='Suggest alternatives to your customer (upsell strategy). '
                                             'Those products show up on the product page.')
     accessory_product_ids = fields.Many2many(
-        'product.product', 'product_accessory_rel', 'src_id', 'dest_id', string='Accessory Products',
+        'product.product', 'product_accessory_rel', 'src_id', 'dest_id', string='Accessory Products', check_company=True,
         help='Accessories show up when the customer reviews the cart before payment (cross-sell strategy).')
     website_size_x = fields.Integer('Size X', default=1)
     website_size_y = fields.Integer('Size Y', default=1)
     website_style_ids = fields.Many2many('product.style', string='Styles')
     website_sequence = fields.Integer('Website Sequence', help="Determine the display order in the Website E-commerce",
-                                      default=lambda self: self._default_website_sequence())
+                                      default=lambda self: self._default_website_sequence(), copy=False)
     public_categ_ids = fields.Many2many(
         'product.public.category', relation='product_public_category_product_template_rel',
         string='Website Product Category',
@@ -409,6 +410,7 @@ class Product(models.Model):
 
     website_url = fields.Char('Website URL', compute='_compute_product_website_url', help='The full URL to access the document through the website.')
 
+    @api.depends_context('lang')
     @api.depends('product_tmpl_id.website_url', 'product_template_attribute_value_ids')
     def _compute_product_website_url(self):
         for product in self:

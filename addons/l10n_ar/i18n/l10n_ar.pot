@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 13.0+e\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-16 15:31+0000\n"
-"PO-Revision-Date: 2019-12-16 15:31+0000\n"
+"POT-Creation-Date: 2020-01-15 13:31+0000\n"
+"PO-Revision-Date: 2020-01-15 13:31+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -555,6 +555,12 @@ msgid "Go to Companies"
 msgstr ""
 
 #. module: l10n_ar
+#: code:addons/l10n_ar/models/account_move.py:0
+#, python-format
+msgid "Go to Journals"
+msgstr ""
+
+#. module: l10n_ar
 #: model:ir.model.fields,field_description:l10n_ar.field_res_company__l10n_ar_gross_income_type
 #: model_terms:ir.ui.view,arch_db:l10n_ar.view_company_form
 #: model_terms:ir.ui.view,arch_db:l10n_ar.view_partner_property_form
@@ -832,7 +838,13 @@ msgstr ""
 #. module: l10n_ar
 #: code:addons/l10n_ar/models/account_journal.py:0
 #, python-format
-msgid "Please define a valid AFIP POS number"
+msgid "Please define a valid AFIP POS number (5 digits max)"
+msgstr ""
+
+#. module: l10n_ar
+#: code:addons/l10n_ar/models/account_journal.py:0
+#, python-format
+msgid "Please define an AFIP POS number"
 msgstr ""
 
 #. module: l10n_ar
@@ -960,6 +972,14 @@ msgstr ""
 #: code:addons/l10n_ar/models/l10n_latam_document_type.py:0
 #, python-format
 msgid "The number of import Dispatch must be 16 characters"
+msgstr ""
+
+#. module: l10n_ar
+#: code:addons/l10n_ar/models/account_move.py:0
+#, python-format
+msgid ""
+"The selected Journal can't be used in this transaction, please select one "
+"that doesn't use documents as these are just for Invoices."
 msgstr ""
 
 #. module: l10n_ar
@@ -1134,6 +1154,13 @@ msgid "With Document"
 msgstr ""
 
 #. module: l10n_ar
+#: code:addons/l10n_ar/models/account_move.py:0
+#, python-format
+msgid ""
+"You are trying to create an invoice for %s but you dont have an %s journal"
+msgstr ""
+
+#. module: l10n_ar
 #: code:addons/l10n_ar/models/account_chart_template.py:0
 #, python-format
 msgid ""
@@ -1152,6 +1179,30 @@ msgstr ""
 #. module: l10n_ar
 #: model:ir.model.fields.selection,name:l10n_ar.selection__l10n_latam_document_type__purchase_aliquots__zero
 msgid "Zero"
+msgstr ""
+
+#. module: l10n_ar
+#: code:addons/l10n_ar/models/account_move.py:0
+#, python-format
+msgid "domestic market"
+msgstr ""
+
+#. module: l10n_ar
+#: code:addons/l10n_ar/models/account_move.py:0
+#, python-format
+msgid "domestic partner"
+msgstr ""
+
+#. module: l10n_ar
+#: code:addons/l10n_ar/models/account_move.py:0
+#, python-format
+msgid "exportation"
+msgstr ""
+
+#. module: l10n_ar
+#: code:addons/l10n_ar/models/account_move.py:0
+#, python-format
+msgid "foreign partner"
 msgstr ""
 
 #. module: l10n_ar

@@ -1,6 +1,6 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, RedirectWarning, ValidationError
 from dateutil.relativedelta import relativedelta
 from lxml import etree
 import logging
@@ -34,6 +34,13 @@ class AccountMove(models.Model):
         " different type if required.")
     l10n_ar_afip_service_start = fields.Date(string='AFIP Service Start Date', readonly=True, states={'draft': [('readonly', False)]})
     l10n_ar_afip_service_end = fields.Date(string='AFIP Service End Date', readonly=True, states={'draft': [('readonly', False)]})
+
+    @api.constrains('type', 'journal_id', 'l10n_latam_use_documents')
+    def _check_moves_use_documents(self):
+        """ Do not let to create not invoices entries in journals that use documents """
+        not_invoices = self.filtered(lambda x: x.company_id.country_id == self.env.ref('base.ar') and x.journal_id.type in ['sale', 'purchase'] and x.l10n_latam_use_documents and not x.is_invoice())
+        if not_invoices:
+            raise ValidationError(_("The selected Journal can't be used in this transaction, please select one that doesn't use documents as these are just for Invoices."))
 
     def _get_afip_invoice_concepts(self):
         """ Return the list of values of the selection field. """
@@ -76,6 +83,8 @@ class AccountMove(models.Model):
             codes = self.journal_id._get_journal_codes()
             if codes:
                 domain.append(('code', 'in', codes))
+            if self.type == 'in_refund':
+                domain = ['|', ('code', 'in', ['99'])] + domain
         return domain
 
     def _check_argentinian_invoice_taxes(self):
@@ -132,14 +141,23 @@ class AccountMove(models.Model):
             res_code = rec.partner_id.l10n_ar_afip_responsibility_type_id.code
             domain = [('company_id', '=', rec.company_id.id), ('l10n_latam_use_documents', '=', True), ('type', '=', 'sale')]
             journal = self.env['account.journal']
-            if res_code in ['8', '9', '10'] and rec.journal_id.l10n_ar_afip_pos_system not in expo_journals:
+            partner_type = journal_type = False
+            if res_code in ['9', '10'] and rec.journal_id.l10n_ar_afip_pos_system not in expo_journals:
                 # if partner is foregin and journal is not of expo, we try to change to expo journal
                 journal = journal.search(domain + [('l10n_ar_afip_pos_system', 'in', expo_journals)], limit=1)
-            elif res_code not in ['8', '9', '10'] and rec.journal_id.l10n_ar_afip_pos_system in expo_journals:
+                partner_type, journal_type = (_('foreign partner'), _('exportation'))
+            elif res_code not in ['9', '10'] and rec.journal_id.l10n_ar_afip_pos_system in expo_journals:
                 # if partner is NOT foregin and journal is for expo, we try to change to local journal
                 journal = journal.search(domain + [('l10n_ar_afip_pos_system', 'not in', expo_journals)], limit=1)
+                partner_type, journal_type = (_('domestic partner'), _('domestic market'))
             if journal:
                 rec.journal_id = journal.id
+            elif partner_type and journal_type:
+                # Throw an error to user in order to proper configure the journal for the type of operation
+                action = self.env.ref('account.action_account_journal_form')
+                msg = _('You are trying to create an invoice for %s but you dont have an %s journal') % (
+                    partner_type, journal_type)
+                raise RedirectWarning(msg, action.id, _('Go to Journals'))
 
     def post(self):
         ar_invoices = self.filtered(lambda x: x.company_id.country_id == self.env.ref('base.ar') and x.l10n_latam_use_documents)

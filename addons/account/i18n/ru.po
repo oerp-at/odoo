@@ -9,7 +9,7 @@
 # Denis Baranov <baranov@itlibertas.com>, 2019
 # Gennady Marchenko <gennadym@gmail.com>, 2019
 # Oleg Kuryan <oleg@ventor.tech>, 2019
-# Konstantin Korovin <korovin74@gmail.com>, 2019
+# Константин Коровин <korovin74@gmail.com>, 2019
 # Collex100, 2019
 # sergeiruzkiicode <sergei.ruzki@icode.by>, 2019
 # Disaster Disasterov <mobarbitr@gmail.com>, 2019
@@ -20,17 +20,19 @@
 # Viktor Pogrebniak <vp@aifil.ru>, 2019
 # Vasiliy Korobatov <korobatov@gmail.com>, 2019
 # Максим Дронь <dronmax@gmail.com>, 2019
-# Martin Trigaux, 2019
 # Anton Ilchenko <anton.wmt@gmail.com>, 2019
-# Ivan Yelizariev <yelizariev@it-projects.info>, 2019
+# Ivan Yelizariev <yelizariev@it-projects.info>, 2020
+# jerome hanke <jhk@odoo.com>, 2020
+# Анищук Сергей <anishukserg@gmail.com>, 2020
+# Martin Trigaux, 2020
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 13.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-12-05 12:32+0000\n"
+"POT-Creation-Date: 2020-04-27 09:21+0000\n"
 "PO-Revision-Date: 2019-08-26 09:06+0000\n"
-"Last-Translator: Ivan Yelizariev <yelizariev@it-projects.info>, 2019\n"
+"Last-Translator: Martin Trigaux, 2020\n"
 "Language-Team: Russian (https://www.transifex.com/odoo/teams/41243/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -84,7 +86,7 @@ msgstr ""
 #: code:addons/account/models/account.py:0
 #, python-format
 msgid "%s (Copy)"
-msgstr "%s (Копия)"
+msgstr " %s (Копия)"
 
 #. module: account
 #: code:addons/account/models/account.py:0
@@ -94,19 +96,19 @@ msgstr "%s (Копия)"
 #: code:addons/account/models/account.py:0
 #, python-format
 msgid "%s (copy)"
-msgstr "%s (копия)"
+msgstr " %s (копия)"
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "%s (rounding)"
-msgstr "(округление)"
+msgstr "%s (округление)"
 
 #. module: account
 #: code:addons/account/models/account.py:0
 #, python-format
 msgid "%s Sequence"
-msgstr "%s Последовательность"
+msgstr " %s Последовательность"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
@@ -142,12 +144,12 @@ msgstr "2 Месяца"
 #. module: account
 #: model:account.payment.term,name:account.account_payment_term_21days
 msgid "21 Days"
-msgstr ""
+msgstr "21 день"
 
 #. module: account
 #: model:account.payment.term,name:account.account_payment_term_30days
 msgid "30 Days"
-msgstr ""
+msgstr "30 дней"
 
 #. module: account
 #: model:account.payment.term,name:account.account_payment_term_advance
@@ -475,7 +477,7 @@ msgstr ""
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
 msgid "<span name=\"button_import_placeholder\"/> Statements"
-msgstr "<span name=\"button_import_placeholder\"/>выписки</span>"
+msgstr "<span name=\"button_import_placeholder\"/> выписки"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
@@ -576,6 +578,11 @@ msgstr "<span>Оригинальное сумма</span>"
 #: model_terms:ir.ui.view,arch_db:account.report_invoice_document
 msgid "<span>Quantity</span>"
 msgstr "<span>Количество</span>"
+
+#. module: account
+#: model_terms:ir.ui.view,arch_db:account.report_payment_receipt_document
+msgid "<span>Reference</span>"
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
@@ -851,6 +858,12 @@ msgid "A selected statement line was already reconciled with an account move."
 msgstr "Выбранная строка уже была согласована с перемещением учётной записи."
 
 #. module: account
+#: code:addons/account/models/account.py:0
+#, python-format
+msgid "A tag defined to be used on taxes must always have a country set."
+msgstr ""
+
+#. module: account
 #: model:ir.model.constraint,message:account.constraint_account_fiscal_position_tax_tax_src_dest_uniq
 msgid "A tax fiscal position could be defined only one time on same taxes."
 msgstr ""
@@ -867,9 +880,8 @@ msgid ""
 "(or switch twice the mode if you are already in the desired one)."
 msgstr ""
 "Пользователь не может иметь сразу налог B2B и B2C. Вам необходимо перейти в "
-"Общие настройки, и выбрать отображение цен на товарах или в режиме &quot;С "
-"НДС&quot; или в &quot;Без НДС&quot; (или дважды переключите режим, если вы "
-"уже в желаемом)."
+"Общие настройки, и выбрать отображение цен на товарах или в режиме `С НДС` "
+"или в `Без НДС` (или дважды переключите режим, если вы уже в желаемом)."
 
 #. module: account
 #: model:res.groups,name:account.group_warning_account
@@ -911,7 +923,7 @@ msgid ""
 "Account %s (%s) does not allow reconciliation. First change the "
 "configuration of this account to allow it."
 msgstr ""
-"Счет% s (% s) не позволяет согласования. Сначала измените настройки этого "
+"Счет %s  (%s ) не позволяет согласования. Сначала измените настройки этого "
 "счета, чтобы позволить согласования."
 
 #. module: account
@@ -1314,9 +1326,17 @@ msgstr "Сопоставление счетов схемы налогообло�
 
 #. module: account
 #: code:addons/account/wizard/account_accrual_accounting.py:0
+#, python-format
+msgid ""
+"Accrual Adjusting Entries ({percent}%% recognized) have been created for "
+"this invoice on {date}"
+msgstr ""
+
+#. module: account
+#: code:addons/account/wizard/account_accrual_accounting.py:0
 #: code:addons/account/wizard/account_accrual_accounting.py:0
 #, python-format
-msgid "Accrual Adjusting Entry (%s recognized) for invoice: %s"
+msgid "Accrual Adjusting Entry (%s%% recognized) for invoice: %s"
 msgstr ""
 
 #. module: account
@@ -1867,6 +1887,7 @@ msgid "Analytic Acc."
 msgstr "Аналитический счёт."
 
 #. module: account
+#: model:ir.model,name:account.model_account_analytic_account
 #: model:ir.model.fields,field_description:account.field_account_invoice_report__analytic_account_id
 #: model:ir.model.fields,field_description:account.field_account_move_line__analytic_account_id
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__analytic_account_id
@@ -1912,6 +1933,7 @@ msgid "Analytic Lines"
 msgstr "Позиции аналитики"
 
 #. module: account
+#: model:ir.model,name:account.model_account_analytic_tag
 #: model:ir.model.fields,field_description:account.field_account_move_line__analytic_tag_ids
 #: model:ir.model.fields,field_description:account.field_account_reconcile_model__analytic_tag_ids
 #: model:ir.model.fields,field_description:account.field_res_config_settings__group_analytic_tags
@@ -2266,7 +2288,7 @@ msgstr "Банковская выписка"
 #: code:addons/account/models/account_bank_statement.py:0
 #, python-format
 msgid "Bank Statement %s"
-msgstr "Банковская выписка %s"
+msgstr "Банковская выписка %s "
 
 #. module: account
 #: code:addons/account/models/account_bank_statement.py:0
@@ -2302,6 +2324,7 @@ msgstr ""
 
 #. module: account
 #: model:ir.actions.act_window,name:account.action_bank_statement_tree
+#: model_terms:ir.ui.view,arch_db:account.view_account_bank_journal_form
 msgid "Bank Statements"
 msgstr "Банковские выписки"
 
@@ -3102,6 +3125,7 @@ msgstr "Связанные с партнёром организации"
 #: model:ir.model.fields,field_description:account.field_account_accrual_accounting_wizard__company_id
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__company_id
 #: model:ir.model.fields,field_description:account.field_account_bank_statement_line__company_id
+#: model:ir.model.fields,field_description:account.field_account_cash_rounding__company_id
 #: model:ir.model.fields,field_description:account.field_account_common_journal_report__company_id
 #: model:ir.model.fields,field_description:account.field_account_common_report__company_id
 #: model:ir.model.fields,field_description:account.field_account_financial_year_op__company_id
@@ -3584,7 +3608,7 @@ msgstr "Создано"
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "Created by: %s"
-msgstr "Он создал% s"
+msgstr "Он создал %s "
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_account__create_date
@@ -4194,10 +4218,10 @@ msgid ""
 "used by itself, however it can still be used in a group. 'adjustment' is "
 "used to perform tax adjustment."
 msgstr ""
-"Определяет, где можно выбрать налог. Примечание: &quot;Нет&quot; означает, "
-"что налог не может быть использован сам по себе, однако он может быть "
-"использован в группе. &quot;Корректировки&quot; используется для "
-"осуществления налогового регулирования."
+"Определяет, где можно выбрать налог. Примечание: `Нет` означает, что налог "
+"не может быть использован сам по себе, однако он может быть использован в "
+"группе. `Корректировки` используется для осуществления налогового "
+"регулирования."
 
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_bank_statement__difference
@@ -5157,9 +5181,9 @@ msgid ""
 msgstr ""
 "Получите банковские выписки, которые автоматически импортируются каждые 4:00"
 " или в один клик, используя службы Yodlee и Plaid. После установки "
-"установите &quot;Банковские выписки&quot; на &quot;Синхронизация с "
-"банком&quot; в настройках банковского счета. Затем нажмите "
-"&quot;Настроить&quot; в онлайн счета, чтобы ввести банковские реквизиты."
+"установите `Банковские выписки` на `Синхронизация с банком` в настройках "
+"банковского счета. Затем нажмите `Настроить` в онлайн счета, чтобы ввести "
+"банковские реквизиты."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_bank_statement_line__sequence
@@ -5751,6 +5775,13 @@ msgid "Indicates that this journal item is a tax line"
 msgstr "Указывает на то, что этот элемент журнала является строкой налога"
 
 #. module: account
+#. openerp-web
+#: code:addons/account/static/src/xml/account_payment.xml:0
+#, python-format
+msgid "Info"
+msgstr "Информация"
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_line_form
 msgid "Information"
 msgstr "Информация"
@@ -5988,7 +6019,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields,field_description:account.field_account_move__invoice_line_ids
 msgid "Invoice lines"
-msgstr ""
+msgstr "Позиции счета"
 
 #. module: account
 #: model:mail.message.subtype,description:account.mt_invoice_paid
@@ -6275,7 +6306,7 @@ msgstr ""
 #: model:ir.ui.menu,name:account.menu_action_account_journal_group_list
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_group_form
 msgid "Journal Groups"
-msgstr ""
+msgstr "Группы журналов"
 
 #. module: account
 #: model:ir.model,name:account.model_account_move_line
@@ -7277,6 +7308,12 @@ msgid "No attachment was provided"
 msgstr ""
 
 #. module: account
+#: code:addons/account/models/account_bank_statement.py:0
+#, python-format
+msgid "No default debit and credit account defined on journal %s (ids: %s)."
+msgstr ""
+
+#. module: account
 #: code:addons/account/models/account_reconcile_model.py:0
 #, python-format
 msgid "No move from this reconciliation model"
@@ -7357,6 +7394,7 @@ msgstr ""
 #. module: account
 #: model:ir.model.fields.selection,name:account.selection__account_invoice_report__invoice_payment_state__not_paid
 #: model:ir.model.fields.selection,name:account.selection__account_move__invoice_payment_state__not_paid
+#: model_terms:ir.ui.view,arch_db:account.view_account_invoice_filter
 msgid "Not Paid"
 msgstr "Не Оплачен"
 
@@ -7565,9 +7603,9 @@ msgid ""
 "Once installed, set 'Bank Feeds' to 'File Import' in bank account "
 "settings.This adds a button to import from the Accounting dashboard."
 msgstr ""
-"После установки установите &quot;Банковские выписки&quot; на &quot;Импорт "
-"файла&quot; в настройках банковского счета. Это придаст кнопку для импорта "
-"из информационной панели бухучета."
+"После установки установите `Банковские выписки` на `Импорт файла` в "
+"настройках банковского счета. Это придаст кнопку для импорта из "
+"информационной панели бухучета."
 
 #. module: account
 #: code:addons/account/models/account_payment.py:0
@@ -7659,6 +7697,7 @@ msgstr "Открытие Номеров Единиц "
 
 #. module: account
 #: code:addons/account/models/account.py:0
+#: code:addons/account/models/account.py:0
 #, python-format
 msgid "Opening balance"
 msgstr "открытие баланса"
@@ -7697,9 +7736,9 @@ msgid ""
 "otherwise it would make a gap in the numbering. You should book an entry and"
 " make a regular revert of it in case you want to cancel it."
 msgstr ""
-"Операция не разрешена. Поскольку ваш строку выписки уже получил в номер (% "
-"s), вы не можете полностью согласовать его с существующими записями журнала,"
-" иначе это сделает разрыв в нумерации. Вы должны забронировать запись и "
+"Операция не разрешена. Поскольку ваш строку выписки уже получил в номер (%s "
+"), вы не можете полностью согласовать его с существующими записями журнала, "
+"иначе это сделает разрыв в нумерации. Вы должны забронировать запись и "
 "сделать регулярное возвращение, если вы хотите его отменить."
 
 #. module: account
@@ -8040,6 +8079,7 @@ msgid "Payment Method Type"
 msgstr "Способ оплаты"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_account_bank_journal_form
 #: model_terms:ir.ui.view,arch_db:account.view_account_journal_form
 msgid "Payment Method Types"
 msgstr "Типы метода оплаты"
@@ -8249,7 +8289,7 @@ msgstr "Процент баланса"
 #: code:addons/account/models/account_payment_term.py:0
 #, python-format
 msgid "Percentages on the Payment Terms lines must be between 0 and 100."
-msgstr "Процент в строках Условия оплат &quot;должен быть от 0 до 100."
+msgstr "Процент в строках Условия оплат `должен быть от 0 до 100."
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_invoice_filter
@@ -8447,6 +8487,13 @@ msgstr ""
 "платежей"
 
 #. module: account
+#. openerp-web
+#: code:addons/account/static/src/xml/account_reconciliation.xml:0
+#, python-format
+msgid "Presets config"
+msgstr ""
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "Preview"
 msgstr "Просмотр"
@@ -8550,7 +8597,7 @@ msgid ""
 "rules than 'invoice_matching'"
 msgstr ""
 "Ошибка программирования: Не может call _get_invoice_matching_query () для "
-"других правил, чем &quot;invoice_matching&quot;"
+"других правил, чем `invoice_matching`"
 
 #. module: account
 #: code:addons/account/models/account_reconcile_model.py:0
@@ -8560,7 +8607,7 @@ msgid ""
 "rules than 'writeoff_suggestion'"
 msgstr ""
 "Ошибка программирования: Нельзя call _get_wo_suggestion_query () для других "
-"правил, чем &quot;writeoff_suggestion&quot;"
+"правил, чем `writeoff_suggestion`"
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_chart_template_form
@@ -8768,7 +8815,7 @@ msgstr "Запись операций в иностранной валюте"
 #: code:addons/account/models/account.py:0
 #, python-format
 msgid "Recursion found for tax '%s'."
-msgstr "Рекурсия найдена для налога &quot;% s&quot;."
+msgstr "Рекурсия найдена для налога ` %s `."
 
 #. module: account
 #. openerp-web
@@ -9063,7 +9110,7 @@ msgstr ""
 #: code:addons/account/wizard/account_move_reversal.py:0
 #, python-format
 msgid "Reversal of: %s"
-msgstr "Сторнирования:% s"
+msgstr "Сторнирования:%s "
 
 #. module: account
 #: code:addons/account/wizard/account_move_reversal.py:0
@@ -9595,8 +9642,8 @@ msgstr ""
 #: model:ir.model.fields,help:account.field_account_account_tag__active
 msgid "Set active to false to hide the Account Tag without removing it."
 msgstr ""
-"Установите активное значение &quot;Неверный&quot;, чтобы скрыть "
-"аналитический тег, не удаляя его."
+"Установите активное значение `Неверный`, чтобы скрыть аналитический тег, не "
+"удаляя его."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_journal__active
@@ -9630,10 +9677,13 @@ msgstr ""
 "шаблона."
 
 #. module: account
+#. openerp-web
+#: code:addons/account/static/src/xml/account_reconciliation.xml:0
 #: model:ir.actions.act_window,name:account.action_account_config
 #: model:ir.actions.act_window,name:account.action_open_settings
 #: model:ir.ui.menu,name:account.menu_account_config
 #: model_terms:ir.ui.view,arch_db:account.account_journal_dashboard_kanban_view
+#, python-format
 msgid "Settings"
 msgstr "Настройки"
 
@@ -9976,11 +10026,6 @@ msgstr "Предложите соотношение значений."
 #: model:ir.model.fields,field_description:account.field_res_users__supplier_rank
 msgid "Supplier Rank"
 msgstr ""
-
-#. module: account
-#: model:ir.actions.act_window,name:account.res_partner_action_supplier
-msgid "Suppliers"
-msgstr "Поставщики"
 
 #. module: account
 #: model:ir.actions.server,name:account.action_move_switch_invoice_to_credit_note
@@ -10640,8 +10685,8 @@ msgid ""
 "The 'Internal Group' is used to filter accounts based on the internal group "
 "set on the account type."
 msgstr ""
-"&quot;Внутренняя группа&quot; используется для фильтрации счетов на основе "
-"внутреннего набора групп для типа счета."
+"`Внутренняя группа` используется для фильтрации счетов на основе внутреннего"
+" набора групп для типа счета."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_account__internal_type
@@ -10660,7 +10705,7 @@ msgstr ""
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "The account %s (%s) is deprecated."
-msgstr "Счет% s (% s) устарел."
+msgstr "Счет %s  (%s ) устарел."
 
 #. module: account
 #: code:addons/account/models/account.py:0
@@ -11162,8 +11207,8 @@ msgid ""
 msgstr ""
 "Модель согласования будет применена только тогда, когда метка: Содержит: "
 "Метка предложения должна содержать эту строку (нечувствителен). Не содержит:"
-" Отклонение &quot;содержит&quot;. * Сопоставление регулярного выражения: "
-"Определите свой регулярное выражение."
+" Отклонение `содержит`. * Сопоставление регулярного выражения: Определите "
+"свой регулярное выражение."
 
 #. module: account
 #: model:ir.model.fields,help:account.field_account_reconcile_model__match_note
@@ -11294,6 +11339,14 @@ msgid ""
 msgstr ""
 "В периоде, который вы хотите заблокировать, по-прежнему остаются "
 "неопубликованные записи. Вы должны либо опубликовать, либо удалить их."
+
+#. module: account
+#: code:addons/account/models/account_payment.py:0
+#, python-format
+msgid ""
+"There is more than one receivable/payable account in the concerned invoices."
+" You cannot group payments in that case."
+msgstr ""
 
 #. module: account
 #: code:addons/account/models/account_payment.py:0
@@ -11781,13 +11834,13 @@ msgstr "Перечислить"
 #: code:addons/account/models/account_payment.py:0
 #, python-format
 msgid "Transfer from %s"
-msgstr "Трансфер из %s"
+msgstr "Трансфер из %s "
 
 #. module: account
 #: code:addons/account/models/account_payment.py:0
 #, python-format
 msgid "Transfer to %s"
-msgstr "Трансфер в %s"
+msgstr "Трансфер в %s "
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_account_payment_search
@@ -12185,6 +12238,7 @@ msgid "Vendor Taxes"
 msgstr "Налоги поставщика"
 
 #. module: account
+#: model:ir.actions.act_window,name:account.res_partner_action_supplier
 #: model:ir.ui.menu,name:account.menu_account_supplier
 #: model:ir.ui.menu,name:account.menu_finance_payables
 #: model_terms:ir.ui.view,arch_db:account.res_partner_view_search
@@ -12220,7 +12274,7 @@ msgstr "Предупреждение"
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid "Warning for %s"
-msgstr "Предупреждение для %s"
+msgstr "Предупреждение для %s "
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.partner_view_buttons
@@ -12463,6 +12517,46 @@ msgstr ""
 "клиенту обратиться к этому конкретному счета при осуществлении платежа."
 
 #. module: account
+#: code:addons/account/models/account.py:0
+#, python-format
+msgid ""
+"You can't change the company of your account since there are some journal "
+"items linked to it."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/account.py:0
+#, python-format
+msgid ""
+"You can't change the company of your journal since there are some journal "
+"entries linked to it."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/account.py:0
+#, python-format
+msgid ""
+"You can't change the company of your tax since there are some journal items "
+"linked to it."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/account_analytic_line.py:0
+#, python-format
+msgid ""
+"You can't set a different company on your analytic account since there are "
+"some journal items linked to it."
+msgstr ""
+
+#. module: account
+#: code:addons/account/models/account_analytic_line.py:0
+#, python-format
+msgid ""
+"You can't set a different company on your analytic tags since there are some"
+" journal items linked to it."
+msgstr ""
+
+#. module: account
 #: code:addons/account/models/account_move.py:0
 #, python-format
 msgid ""
@@ -12563,7 +12657,7 @@ msgid ""
 "(account code: %s)"
 msgstr ""
 "Вы не можете иметь счет, подлежащего получению / уплате, не подлежит "
-"согласованию. (Код счета:% s)"
+"согласованию. (Код счета:%s )"
 
 #. module: account
 #: code:addons/account/models/account.py:0
@@ -12572,8 +12666,8 @@ msgid ""
 "You cannot have more than one account with \"Current Year Earnings\" as "
 "type. (accounts: %s)"
 msgstr ""
-"Вы не можете иметь более одного счета с &quot;прибыли текущего периода&quot;"
-" как тип. (Счета:% s)"
+"Вы не можете иметь более одного счета с `прибыли текущего периода` как тип. "
+"(Счета:%s )"
 
 #. module: account
 #: code:addons/account/models/account_move.py:0
@@ -12727,6 +12821,12 @@ msgid ""
 msgstr ""
 
 #. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid "You don't have the access rights to post an invoice."
+msgstr ""
+
+#. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_move_form
 msgid "You have"
 msgstr "Вы имеете"
@@ -12749,8 +12849,8 @@ msgid ""
 "You have to define an 'Internal Transfer Account' in your cash register's "
 "journal."
 msgstr ""
-"Вы должны определить &quot;Внутренний перевод счета&quot; в журнале вашего "
-"кассового аппарата."
+"Вы должны определить `Внутренний перевод счета` в журнале вашего кассового "
+"аппарата."
 
 #. module: account
 #: code:addons/account/models/account.py:0
@@ -13028,43 +13128,3 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:account.view_bank_statement_form
 msgid "→ Count"
 msgstr "→ Считать"
-
-#. module: account
-#: code:addons/account/models/account.py:0
-#, python-format
-msgid ""
-"You can't change the company of your account since there are some journal "
-"items linked to it."
-msgstr ""
-
-#. module: account
-#: code:addons/account/models/account.py:0
-#, python-format
-msgid ""
-"You can't change the company of your journal since there are some journal "
-"entries linked to it."
-msgstr ""
-
-#. module: account
-#: code:addons/account/models/account.py:0
-#, python-format
-msgid ""
-"You can't change the company of your tax since there are some journal items "
-"linked to it."
-msgstr ""
-
-#. module: account
-#: code:addons/account/models/account_analytic_line.py:0
-#, python-format
-msgid ""
-"You can't set a different company on your analytic account since there are "
-"some journal items linked to it."
-msgstr ""
-
-#. module: account
-#: code:addons/account/models/account_analytic_line.py:0
-#, python-format
-msgid ""
-"You can't set a different company on your analytic tags since there are some"
-" journal items linked to it."
-msgstr ""

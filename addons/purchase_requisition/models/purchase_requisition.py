@@ -71,10 +71,16 @@ class PurchaseRequisition(models.Model):
 
     @api.depends('state')
     def _set_state(self):
-        self.state_blanket_order = self.state
+        for requisition in self:
+            requisition.state_blanket_order = requisition.state
 
     @api.onchange('vendor_id')
     def _onchange_vendor(self):
+        if not self.vendor_id:
+            self.currency_id = self.env.company.currency_id.id
+        else:
+            self.currency_id = self.vendor_id.property_purchase_currency_id.id or self.env.company.currency_id.id
+
         requisitions = self.env['purchase.requisition'].search([
             ('vendor_id', '=', self.vendor_id.id),
             ('state', '=', 'ongoing'),

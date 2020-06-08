@@ -363,7 +363,8 @@ on the requirements file in a terminal **with Administrator privileges**:
 .. code-block:: doscon
 
     C:\> cd \CommunityPath
-    C:\> pip install wheel -r requirements.txt
+    C:\> pip install setuptools wheel
+    C:\> pip install -r requirements.txt
 
 .. warning:: `wkhtmltopdf` is not installed through **pip** and must be installed manually in
              version `0.12.5 <the wkhtmltopdf download page_>`_ for it to support headers and
@@ -406,11 +407,12 @@ A typical way to run the server would be:
 .. code-block:: doscon
 
     C:\> cd CommunityPath/
-    C:\> python odoo-bin -r dbuser -w dbpassword --addons-path=addons,../mymodules --db-filter=mydb$
+    C:\> python odoo-bin -r dbuser -w dbpassword --addons-path=addons -d mydb
 
 Where `CommunityPath` is the path of the Odoo Community installation, `dbuser` is the
-PostgreSQL login, `dbpassword` is the PostgreSQL password, `../mymodules` is a directory with
-additional addons (if any) and `mydb` is the default database to serve on `localhost:8069`.
+PostgreSQL login, `dbpassword` is the PostgreSQL password
+and `mydb` is the default database to serve on `localhost:8069`. You can add other
+directory paths separated by a comma to ``addons`` at the end of the addons-path option.
 
 Linux
 -----
@@ -530,7 +532,8 @@ on the requirements file:
 .. code-block:: console
 
     $ cd /CommunityPath
-    $ pip3 install wheel -r requirements.txt
+    $ pip3 install setuptools wheel
+    $ pip3 install -r requirements.txt
 
 .. warning:: `wkhtmltopdf` is not installed through **pip** and must be installed manually in
              version `0.12.5 <the wkhtmltopdf download page_>`_ for it to support headers and
@@ -572,10 +575,11 @@ A typical way to run the server would be:
 .. code-block:: console
 
     $ cd /CommunityPath
-    $ python3 odoo-bin --addons-path=addons,../mymodules --db-filter=mydb$
+    $ python3 odoo-bin --addons-path=addons -d mydb
 
-Where `CommunityPath` is the path of the Odoo Community installation, `../mymodules` is a
-directory with additional addons (if any) and `mydb` is the default database to serve on `localhost:8069`.
+Where `CommunityPath` is the path of the Odoo Community installation
+and `mydb` is the default database to serve on `localhost:8069`. You can add other
+directory paths separated by a comma to ``addons`` at the end of the addons-path option.
 
 Mac OS
 ------
@@ -679,7 +683,8 @@ on the requirements file:
 .. code-block:: console
 
    $ cd /CommunityPath
-   /CommunityPath$ pip3 install -r requirements.txt
+   $ pip3 install setuptools wheel
+   $ pip3 install -r requirements.txt
 
 .. warning:: Non-Python dependencies need to be installed with a package manager:
 
@@ -732,10 +737,11 @@ A typical way to run the server would be:
 .. code-block:: console
 
     $ cd /CommunityPath
-    $ python3 odoo-bin --addons-path=addons,../mymodules --db-filter=mydb$
+    $ python3 odoo-bin --addons-path=addons -d mydb
 
-Where `CommunityPath` is the path of the Odoo Community installation, `../mymodules` is a
-directory with additional addons (if any) and `mydb` is the default database to serve on `localhost:8069`.
+Where `CommunityPath` is the path of the Odoo Community installation
+and `mydb` is the default database to serve on `localhost:8069`. You can add other
+directory paths separated by a comma to ``addons`` at the end of the addons-path option.
 
 
 .. _setup/install/docker:

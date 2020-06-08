@@ -96,26 +96,19 @@ class Project(models.Model):
             project.task_count = result.get(project.id, 0)
 
     def attachment_tree_view(self):
-        self.ensure_one()
-        domain = [
+        attachment_action = self.env.ref('base.action_attachment')
+        action = attachment_action.read()[0]
+        action['domain'] = str([
             '|',
-            '&', ('res_model', '=', 'project.project'), ('res_id', 'in', self.ids),
-            '&', ('res_model', '=', 'project.task'), ('res_id', 'in', self.task_ids.ids)]
-        return {
-            'name': _('Attachments'),
-            'domain': domain,
-            'res_model': 'ir.attachment',
-            'type': 'ir.actions.act_window',
-            'view_id': False,
-            'view_mode': 'kanban,tree,form',
-            'help': _('''<p class="o_view_nocontent_smiling_face">
-                        Documents are attached to the tasks of your project.</p><p>
-                        Send messages or log internal notes with attachments to link
-                        documents to your project.
-                    </p>'''),
-            'limit': 80,
-            'context': "{'default_res_model': '%s','default_res_id': %d}" % (self._name, self.id)
-        }
+            '&',
+            ('res_model', '=', 'project.project'),
+            ('res_id', 'in', self.ids),
+            '&',
+            ('res_model', '=', 'project.task'),
+            ('res_id', 'in', self.task_ids.ids)
+        ])
+        action['context'] = "{'default_res_model': '%s','default_res_id': %d}" % (self._name, self.id)
+        return action
 
     @api.model
     def activate_sample_project(self):
@@ -180,7 +173,7 @@ class Project(models.Model):
         string='Members')
     is_favorite = fields.Boolean(compute='_compute_is_favorite', inverse='_inverse_is_favorite', string='Show Project on dashboard',
         help="Whether this project should be displayed on your dashboard.")
-    label_tasks = fields.Char(string='Use Tasks as', default='Tasks', help="Label used for the tasks of the project.")
+    label_tasks = fields.Char(string='Use Tasks as', default='Tasks', help="Label used for the tasks of the project.", translate=True)
     tasks = fields.One2many('project.task', 'project_id', string="Task Activities")
     resource_calendar_id = fields.Many2one(
         'resource.calendar', string='Working Time',
@@ -920,8 +913,6 @@ class Task(models.Model):
         self.write({'user_id': self.env.user.id})
 
     def action_open_parent_task(self):
-        if self.sudo().parent_id and self.sudo().parent_id.company_id.id not in self.env.companies.ids:
-            raise UserError(_('The parent task belongs to a company you do not have access to.'))
         return {
             'name': _('Parent Task'),
             'view_mode': 'form',
@@ -932,8 +923,6 @@ class Task(models.Model):
         }
 
     def action_subtask(self):
-        if self.sudo().subtask_project_id and self.sudo().subtask_project_id.company_id.id not in self.env.companies.ids:
-            raise UserError(_('The subtasks belong to a company you do not have access to.'))
         action = self.env.ref('project.project_task_action_sub_task').read()[0]
 
         # only display subtasks of current task

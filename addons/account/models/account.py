@@ -58,6 +58,12 @@ class AccountAccountTag(models.Model):
     tax_negate = fields.Boolean(string="Negate Tax Balance", help="Check this box to negate the absolute value of the balance of the lines associated with this tag in tax report computation.")
     country_id = fields.Many2one(string="Country", comodel_name='res.country', help="Country for which this tag is available, when applied on taxes.")
 
+    @api.constrains('country_id', 'applicability')
+    def _validate_tag_country(self):
+        for record in self:
+            if record.applicability == 'taxes' and not record.country_id:
+                raise ValidationError(_("A tag defined to be used on taxes must always have a country set."))
+
 
 class AccountTaxReportLine(models.Model):
     _name = "account.tax.report.line"
@@ -306,7 +312,7 @@ class AccountAccount(models.Model):
         # This field should have been a char, but the aim is to use it in a side panel view with hierarchy, and it's only supported by many2one fields so far.
         # So instead, we make it a many2one to a psql view with what we need as records.
         for record in self:
-            record.root_id = record.code and (ord(record.code[0]) * 1000 + ord(record.code[1])) or False
+            record.root_id = (ord(record.code[0]) * 1000 + ord(record.code[1:2] or '\x00')) if record.code else False
 
     def _search_used(self, operator, value):
         if operator not in ['=', '!='] or not isinstance(value, bool):
@@ -334,11 +340,10 @@ class AccountAccount(models.Model):
             if record.company_id.account_opening_move_id:
                 for line in self.env['account.move.line'].search([('account_id', '=', record.id),
                                                                  ('move_id','=', record.company_id.account_opening_move_id.id)]):
-                    #could be executed at most twice: once for credit, once for debit
                     if line.debit:
-                        opening_debit = line.debit
+                        opening_debit += line.debit
                     elif line.credit:
-                        opening_credit = line.credit
+                        opening_credit += line.credit
             record.opening_debit = opening_debit
             record.opening_credit = opening_credit
 
@@ -354,28 +359,35 @@ class AccountAccount(models.Model):
         either 'debit' or 'credit', depending on which one of these two fields
         got assigned.
         """
+        self.company_id.create_op_move_if_non_existant()
         opening_move = self.company_id.account_opening_move_id
-
-        if not opening_move:
-            raise UserError(_("You must first define an opening move."))
 
         if opening_move.state == 'draft':
             # check whether we should create a new move line or modify an existing one
-            opening_move_line = self.env['account.move.line'].search([('account_id', '=', self.id),
+            account_op_lines = self.env['account.move.line'].search([('account_id', '=', self.id),
                                                                       ('move_id','=', opening_move.id),
                                                                       (field,'!=', False),
                                                                       (field,'!=', 0.0)]) # 0.0 condition important for import
 
-            counter_part_map = {'debit': opening_move_line.credit, 'credit': opening_move_line.debit}
-            # No typo here! We want the credit value when treating debit and debit value when treating credit
+            if account_op_lines:
+                op_aml_debit = sum(account_op_lines.mapped('debit'))
+                op_aml_credit = sum(account_op_lines.mapped('credit'))
 
-            if opening_move_line:
+                # There might be more than one line on this account if the opening entry was manually edited
+                # If so, we need to merge all those lines into one before modifying its balance
+                opening_move_line = account_op_lines[0]
+                if len(account_op_lines) > 1:
+                    merge_write_cmd = [(1, opening_move_line.id, {'debit': op_aml_debit, 'credit': op_aml_credit, 'partner_id': None ,'name': _("Opening balance")})]
+                    unlink_write_cmd = [(2, line.id) for line in account_op_lines[1:]]
+                    opening_move.write({'line_ids': merge_write_cmd + unlink_write_cmd})
+
                 if amount:
                     # modify the line
                     opening_move_line.with_context(check_move_validity=False)[field] = amount
-                elif counter_part_map[field]:
+                else:
                     # delete the line (no need to keep a line with value = 0)
                     opening_move_line.with_context(check_move_validity=False).unlink()
+
             elif amount:
                 # create a new line, as none existed before
                 self.env['account.move.line'].with_context(check_move_validity=False).create({
@@ -460,7 +472,7 @@ class AccountAccount(models.Model):
         if default.get('code', False):
             return super(AccountAccount, self).copy(default)
         try:
-            default['code'] = (str(int(self.code) + 10) or '')
+            default['code'] = (str(int(self.code) + 10) or '').zfill(len(self.code))
             default.setdefault('name', _("%s (copy)") % (self.name or ''))
             while self.env['account.account'].search([('code', '=', default['code']),
                                                       ('company_id', '=', default.get('company_id', False) or self.company_id.id)], limit=1):
@@ -522,7 +534,7 @@ class AccountAccount(models.Model):
         query = """
             UPDATE account_move_line
                 SET amount_residual = 0, amount_residual_currency = 0
-            WHERE full_reconcile_id = NULL AND account_id IN %s
+            WHERE full_reconcile_id IS NULL AND account_id IN %s
         """
         self.env.cr.execute(query, [tuple(self.ids)])
 
@@ -966,7 +978,7 @@ class AccountJournal(models.Model):
             draft_moves = self.env['account.move'].search([('journal_id', 'in', self.ids), ('state', '=', 'draft')])
             pending_payments = draft_moves.mapped('line_ids.payment_id')
             pending_payments.mapped('move_line_ids.move_id').post()
-            pending_payments.mapped('reconciled_invoice_ids').filtered(lambda x: x.state == 'in_payment').write({'state': 'paid'})
+            pending_payments.mapped('reconciled_invoice_ids').filtered(lambda x: x.invoice_payment_state == 'in_payment').write({'invoice_payment_state': 'paid'})
         for record in self:
             if record.restrict_mode_hash_table and not record.secure_sequence_id:
                 record._create_secure_sequence(['secure_sequence_id'])
@@ -1343,9 +1355,9 @@ class AccountTax(models.Model):
             JOIN account_tax tax ON tax.id = line.tax_line_id
             WHERE line.tax_line_id IN %s
             AND line.company_id != tax.company_id
-            
+
             UNION ALL
-            
+
             SELECT line.id
             FROM account_move_line_account_tax_rel tax_rel
             JOIN account_tax tax ON tax.id = tax_rel.account_tax_id
@@ -1445,7 +1457,7 @@ class AccountTax(models.Model):
             return base_amount - (base_amount / (1 + self.amount / 100))
         # base / (1 - tax_amount) = new_base
         if self.amount_type == 'division' and not price_include:
-            return base_amount / (1 - self.amount / 100) - base_amount
+            return base_amount / (1 - self.amount / 100) - base_amount if (1 - self.amount / 100) else 0.0
         # <=> new_base * (1 - tax_amount) = base
         if self.amount_type == 'division' and price_include:
             return base_amount - (base_amount * (self.amount / 100))
@@ -1556,7 +1568,7 @@ class AccountTax(models.Model):
         # || tax_3 |   ..   |          |
         # ||  ...  |   ..   |    ..    |
         #    ----------------------------
-        def recompute_base(base_amount, fixed_amount, percent_amount, division_amount):
+        def recompute_base(base_amount, fixed_amount, percent_amount, division_amount, prec):
             # Recompute the new base amount based on included fixed/percent amounts and the current base amount.
             # Example:
             #  tax  |  amount  |   type   |  price_include  |
@@ -1569,7 +1581,7 @@ class AccountTax(models.Model):
 
             # if base_amount = 145, the new base is computed as:
             # (145 - 15) / (1.0 + 30%) * 90% = 130 / 1.3 * 90% = 90
-            return (base_amount - fixed_amount) / (1.0 + percent_amount / 100.0) * (100 - division_amount) / 100
+            return round((base_amount - fixed_amount) / (1.0 + percent_amount / 100.0) * (100 - division_amount) / 100, prec)
 
         base = round(price_unit * quantity, prec)
 
@@ -1598,7 +1610,7 @@ class AccountTax(models.Model):
                 sum_repartition_factor = sum(tax_repartition_lines.mapped("factor"))
 
                 if tax.include_base_amount:
-                    base = recompute_base(base, incl_fixed_amount, incl_percent_amount, incl_division_amount)
+                    base = recompute_base(base, incl_fixed_amount, incl_percent_amount, incl_division_amount, prec)
                     incl_fixed_amount = incl_percent_amount = incl_division_amount = 0
                     store_included_tax_total = True
                 if tax.price_include or self._context.get('force_price_include'):
@@ -1610,7 +1622,7 @@ class AccountTax(models.Model):
                         incl_fixed_amount += quantity * tax.amount * sum_repartition_factor
                     else:
                         # tax.amount_type == other (python)
-                        tax_amount = tax._compute_amount(base, price_unit, quantity, product, partner) * sum_repartition_factor
+                        tax_amount = tax._compute_amount(base, sign * price_unit, quantity, product, partner) * sum_repartition_factor
                         incl_fixed_amount += tax_amount
                         # Avoid unecessary re-computation
                         cached_tax_amounts[i] = tax_amount
@@ -1619,7 +1631,7 @@ class AccountTax(models.Model):
                         store_included_tax_total = False
                 i -= 1
 
-        total_excluded = recompute_base(base, incl_fixed_amount, incl_percent_amount, incl_division_amount)
+        total_excluded = recompute_base(base, incl_fixed_amount, incl_percent_amount, incl_division_amount, prec)
 
         # 5) Iterate the taxes in the sequence order to compute missing tax amounts.
         # Start the computation of accumulated amounts at the total_excluded value.
