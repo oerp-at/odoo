@@ -537,12 +537,12 @@ class Test(ConfigCommand):
       
       mods = get_test_modules(module_name)
       threading.currentThread().testing = True
-      config_tags = TagsSelector(test_tags)
-      position_tag = TagsSelector(test_position)
+      config_tags = TagsSelector(test_tags) if test_tags else None
+      position_tag = TagsSelector(test_position) if test_position else None
       r = True
       for m in mods:
           tests = unwrap_suite(unittest.TestLoader().loadTestsFromModule(m))
-          suite = unittest.TestSuite(t for t in tests if position_tag.check(t) and config_tags.check(t) and match_filter(t))
+          suite = unittest.TestSuite(t for t in tests if (not position_tag or position_tag.check(t)) and (not config_tags or config_tags.check(t)) and match_filter(t))
   
           if suite.countTestCases():
               t0 = time.time()
