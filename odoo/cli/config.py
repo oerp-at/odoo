@@ -1123,7 +1123,7 @@ class Serve(Command):
     def get_module_list(self, path):
         mods = glob.glob(os.path.join(path, "*/%s" % MANIFEST))
         return [mod.split(os.path.sep)[-2] for mod in mods]
-
+    
     def run(self, cmdargs):
         parser = argparse.ArgumentParser(prog="%s start" % sys.argv[0].split(os.path.sep)[-1], description=self.__doc__)
 
@@ -1139,6 +1139,8 @@ class Serve(Command):
             help="Specify the database name (default to project's directory name",
         )
 
+        parser.add_argument("--debug", action="store_true")
+
         args, unknown = parser.parse_known_args(args=cmdargs)
 
         dir_server = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../.."))
@@ -1149,7 +1151,8 @@ class Serve(Command):
 
         # get addons paths
         if "--addons-path" not in cmdargs:
-            addon_pattern = [dir_workspace + "/addons*"]
+            addon_pattern = [dir_server + "/addons",
+                             dir_workspace + "/addons*"]
             package_paths = set()
             for cur_pattern in addon_pattern:
                 for package_dir in glob.glob(cur_pattern):
@@ -1178,12 +1181,16 @@ class Serve(Command):
             if "--db-filter" not in cmdargs:
                 cmdargs.append("--db-filter=^%s$" % args.db_name)
 
+        # remove package paths, to allow debugger find
+        # local modul source code
+        if args.debug:
+            odoo.addons.__path__ =  [odoo.addons.__path__[0]]
+
         # Remove --path /-p options from the command arguments
         def to_remove(i, l):
-            return l[i] == "-p" or l[i].startswith("--path") or (i > 0 and l[i - 1] in ["-p", "--path"])
+            return l[i] == "--debug" or l[i] == "-p" or l[i].startswith("--path") or (i > 0 and l[i - 1] in ["-p", "--path"])
 
-        cmdargs = [v for i, v in enumerate(cmdargs) if not to_remove(i, cmdargs)]
-
+        cmdargs = [v for i, v in enumerate(cmdargs) if not to_remove(i, cmdargs)]        
         main(cmdargs)
 
 
