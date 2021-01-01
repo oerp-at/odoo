@@ -347,10 +347,11 @@ class Update(ConfigCommand):
                 return
 
             _logger.info("Create thread pool (%s) for update" % self.params.threads)
-            
-            with Pool(processes=self.params.threads) as pool:          
-                pool.map(update_database, self.get_databases())
 
+            pool = Pool(processes=self.params.threads)
+            pool.map(update_database, self.get_databases())
+            pool.close()
+            pool.join_thread()
         else:
             update_database(self.params.database)
             
