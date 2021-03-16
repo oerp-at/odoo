@@ -16,6 +16,7 @@
 # Pavol Krnáč <pavol.krnac@ekoenergo.sk>, 2020
 # Damian Brencic <brencicdamian12313@gmail.com>, 2021
 # Martin Trigaux, 2021
+# Ivana Bartonkova <ivana.bartonkova@gmail.com>, 2021
 # Rastislav Brencic <rastislav.brencic@azet.sk>, 2021
 # 
 msgid ""
@@ -327,7 +328,7 @@ msgstr "50%"
 #: model_terms:ir.ui.view,arch_db:website.template_footer_call_to_action
 msgid "50,000+ companies run Odoo to grow their businesses."
 msgstr ""
-"Viac ako 50 000 spoločností prevádzkuje Odoo s cieľom rozvíjať svoje "
+"Viac ako 70 000+ spoločností prevádzkuje Odoo s cieľom rozvíjať svoje "
 "podnikanie."
 
 #. module: website
@@ -346,7 +347,7 @@ msgstr "80% rozvoj"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_call_to_action
 msgid "<b>50,000+ companies</b> run Odoo to grow their businesses."
-msgstr "<b>50,000+ firiem</b> pracuje s Odoo a rozvíja svoje podnikanie."
+msgstr "<b>70,000+ firiem</b> pracuje s Odoo a rozvíja svoje podnikanie."
 
 #. module: website
 #. openerp-web
@@ -1520,7 +1521,7 @@ msgstr "Ako sme sľúbili, ponúkneme 4 bezplatné vstupenky na náš ďalší s
 #. module: website
 #: model:ir.model,name:website.model_web_editor_assets
 msgid "Assets Utils"
-msgstr "Využitie aktív"
+msgstr "Využitie majetku"
 
 #. module: website
 #: model:ir.model,name:website.model_ir_attachment
@@ -3024,7 +3025,8 @@ msgstr "Presuňte ďalší blok na svojej stránke pod obálku."
 #: code:addons/website/static/src/js/tours/tour_utils.js:0
 #, python-format
 msgid ""
-"Drag the <b>${snippet.name}</b> building block and drop it in your page."
+"Drag the <b>${snippet.name}</b> building block and drop it at the bottom of "
+"your page."
 msgstr ""
 
 #. module: website
@@ -4533,8 +4535,8 @@ msgid ""
 "It appears you are in debug=assets mode, all theme customization options "
 "require a page reload in this mode."
 msgstr ""
-"Zdá sa, že ste v režime ladenia = aktíva, všetky možnosti prispôsobenia témy"
-" vyžadujú v tomto režime načítanie stránky znova."
+"Zdá sa, že ste v režime ladenia = majetku, všetky možnosti prispôsobenia "
+"témy vyžadujú v tomto režime načítanie stránky znova."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -5073,7 +5075,7 @@ msgstr "Nadpis média"
 #: model_terms:ir.ui.view,arch_db:website.s_share_options
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "Medium"
-msgstr "Stredný"
+msgstr "Médium"
 
 #. module: website
 #. openerp-web
@@ -7933,6 +7935,8 @@ msgid ""
 "Used to make advertising more engaging to users and more valuable to publishers and advertisers,\n"
 "                                                such as providing more relevant ads when you visit other websites that display ads or to improve reporting on ad campaign performance."
 msgstr ""
+"Používa sa na to, aby bola reklama pre používateľov pútavejšia a hodnotnejšia pre vydavateľov a inzerentov,\n"
+"napríklad poskytovanie relevantnejších reklám pri návšteve iných webov, ktoré zobrazujú reklamy, alebo zlepšenie prehľadov o výkonnosti reklamných kampaní."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_res_config_settings__website_country_group_ids
@@ -8197,6 +8201,8 @@ msgid ""
 "We are a team of passionate people whose goal is to improve everyone's "
 "life.<br/>Our services are designed for small to medium size companies."
 msgstr ""
+"Sme tím vášnivých ľudí, ktorých cieľom je zlepšiť život každého "
+"človeka.<br/>Naše služby sú určené pre malé a stredné spoločnosti."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_progress_bar
@@ -9142,7 +9148,7 @@ msgstr ""
 #: code:addons/website/static/src/snippets/s_countdown/000.xml:0
 #, python-format
 msgid "this page"
-msgstr ""
+msgstr "táto stránka"
 
 #. module: website
 #. openerp-web
@@ -9186,27 +9192,27 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "⌙ Background"
-msgstr ""
+msgstr "⌙ Pozadie"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options_shadow_widgets
 msgid "⌙ Blur"
-msgstr ""
+msgstr "⌙ Rozmazanie"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "⌙ Buttons"
-msgstr ""
+msgstr "⌙ Tlačítka"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options_shadow_widgets
 msgid "⌙ Color"
-msgstr ""
+msgstr "⌙ Farba"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "⌙ Colors"
-msgstr ""
+msgstr "⌙ Farby"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_popup_options
@@ -9216,12 +9222,12 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "⌙ Headings"
-msgstr ""
+msgstr "⌙ Nadpisy"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "⌙ Height"
-msgstr ""
+msgstr "⌙ Výška"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -9231,27 +9237,27 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_rating_options
 msgid "⌙ Inactive"
-msgstr ""
+msgstr "⌙ Neaktívne"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options_background_options
 msgid "⌙ Intensity"
-msgstr ""
+msgstr "⌙ Intenzita"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "⌙ Label"
-msgstr ""
+msgstr "⌙ Štítok"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "⌙ Large"
-msgstr ""
+msgstr "⌙ Veľké"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_dynamic_snippet_options_template
 msgid "⌙ Normal devices"
-msgstr ""
+msgstr "⌙ Normálne zariadenia"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
@@ -9276,17 +9282,17 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "⌙ Small"
-msgstr ""
+msgstr "⌙ Malé"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_dynamic_snippet_options_template
 msgid "⌙ Small devices"
-msgstr ""
+msgstr "⌙ Malé zariadenia"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "⌙ Spacing"
-msgstr ""
+msgstr "⌙ Medzery"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options_shadow_widgets
@@ -9296,7 +9302,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_google_map_options
 msgid "⌙ Style"
-msgstr ""
+msgstr "⌙ Štýl"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options_background_options
@@ -9306,4 +9312,4 @@ msgstr "⌙ Video"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippet_options
 msgid "⌙ Width"
-msgstr ""
+msgstr "⌙ Šírka"

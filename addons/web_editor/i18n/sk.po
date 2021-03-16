@@ -13,8 +13,8 @@
 # Filip Brenčič <brencicf5@gmail.com>, 2020
 # karolína schusterová <karolina.schusterova@vdp.sk>, 2020
 # Pavol Krnáč <pavol.krnac@ekoenergo.sk>, 2020
-# Rastislav Brencic <rastislav.brencic@azet.sk>, 2020
 # Damian Brencic <brencicdamian12313@gmail.com>, 2021
+# Rastislav Brencic <rastislav.brencic@azet.sk>, 2021
 # 
 msgid ""
 msgstr ""
@@ -22,7 +22,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-11-27 14:13+0000\n"
 "PO-Revision-Date: 2020-09-07 08:20+0000\n"
-"Last-Translator: Damian Brencic <brencicdamian12313@gmail.com>, 2021\n"
+"Last-Translator: Rastislav Brencic <rastislav.brencic@azet.sk>, 2021\n"
 "Language-Team: Slovak (https://www.transifex.com/odoo/teams/41243/sk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -272,7 +272,7 @@ msgstr "Pomer strán"
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_web_editor_assets
 msgid "Assets Utils"
-msgstr "Využitie aktív"
+msgstr "Využitie majetku"
 
 #. module: web_editor
 #: model:ir.model,name:web_editor.model_ir_attachment
@@ -1235,7 +1235,7 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/wysiwyg.xml:0
 #, python-format
 msgid "Medium"
-msgstr "Stredný"
+msgstr "Médium"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippets
@@ -1330,6 +1330,13 @@ msgstr ""
 #: code:addons/web_editor/static/src/xml/ace.xml:0
 #, python-format
 msgid "Only Page SCSS Files"
+msgstr ""
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/js/editor/snippets.options.js:0
+#, python-format
+msgid "Only PNG and JPEG images support quality options and image filtering"
 msgstr ""
 
 #. module: web_editor
@@ -1481,6 +1488,13 @@ msgid ""
 "Quality options are unavailable for external images. If you want to change "
 "this image's quality, please first download it from the original source and "
 "upload it in Odoo."
+msgstr ""
+
+#. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/js/editor/snippets.options.js:0
+#, python-format
+msgid "Quality options unavailable"
 msgstr ""
 
 #. module: web_editor
@@ -2246,7 +2260,7 @@ msgstr "Náhľad"
 #: code:addons/web_editor/static/src/xml/ace.xml:0
 #, python-format
 msgid "Views and Assets bundles"
-msgstr ""
+msgstr "Balíky zobrazení a majetku"
 
 #. module: web_editor
 #. openerp-web
@@ -2388,6 +2402,16 @@ msgid "darken"
 msgstr ""
 
 #. module: web_editor
+#. openerp-web
+#: code:addons/web_editor/static/src/js/editor/snippets.options.js:0
+#, python-format
+msgid ""
+"Due to technical limitations, you can only change optimization settings on "
+"this image by choosing it again in the media-dialog or reuploading it "
+"(double click on the image)"
+msgstr ""
+
+#. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_image_optimization_widgets
 msgid "exclusion"
 msgstr ""
@@ -2449,7 +2473,7 @@ msgstr ""
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
 msgid "⌙ Colors"
-msgstr ""
+msgstr "⌙ Farby"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
@@ -2464,7 +2488,7 @@ msgstr ""
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
 msgid "⌙ Height"
-msgstr ""
+msgstr "⌙ Výška"
 
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
@@ -2484,4 +2508,4 @@ msgstr ""
 #. module: web_editor
 #: model_terms:ir.ui.view,arch_db:web_editor.snippet_options_background_options
 msgid "⌙ Width"
-msgstr ""
+msgstr "⌙ Šírka"

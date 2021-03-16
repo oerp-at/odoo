@@ -66,7 +66,7 @@ msgid ""
 "${object.name or 'n/a' })"
 msgstr ""
 "${object.company_id.name} ${object.state in ('draft', 'sent') and "
-"(ctx.get('proforma') and 'Proforma' or 'Quotation') or 'Order'} (Ref "
+"(ctx.get('proforma') and 'Proforma' or 'Offerte') or 'Order'} (Ref "
 "${object.name or 'n/a' })"
 
 #. module: sale
@@ -3156,7 +3156,7 @@ msgstr "Hvhd"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__qty_delivered
 msgid "Qty Delivered"
-msgstr "Aantal geleverd"
+msgstr "Hvh geleverd"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__qty_invoiced
@@ -3166,7 +3166,7 @@ msgstr "Gefactureerde hvh"
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__product_uom_qty
 msgid "Qty Ordered"
-msgstr "Bestelde hvh"
+msgstr "Hvh bestelde"
 
 #. module: sale
 #: model:ir.model.fields,field_description:sale.field_sale_report__qty_to_invoice

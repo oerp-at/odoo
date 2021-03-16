@@ -10,8 +10,8 @@
 # Michal Veselý <michal@veselyberanek.net>, 2020
 # Damian Brencic <brencicdamian12313@gmail.com>, 2020
 # karolína schusterová <karolina.schusterova@vdp.sk>, 2021
+# trendspotter, 2021
 # Rastislav Brencic <rastislav.brencic@azet.sk>, 2021
-# Jiří Podhorecký, 2021
 # 
 msgid ""
 msgstr ""
@@ -19,7 +19,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-11-27 13:50+0000\n"
 "PO-Revision-Date: 2020-09-07 08:09+0000\n"
-"Last-Translator: Jiří Podhorecký, 2021\n"
+"Last-Translator: Rastislav Brencic <rastislav.brencic@azet.sk>, 2021\n"
 "Language-Team: Czech (https://www.transifex.com/odoo/teams/41243/cs/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -71,7 +71,7 @@ msgstr ""
 "Přidání strukturované komunikace k fakturám zákazníků.\n"
 "--------------------------------------------------\n"
 "\n"
-"Použití strukturované komunikace BBA zjednodušuje sladění faktur a plateb.\n"
+"Použití strukturované komunikace BBA zjednodušuje párování faktur a plateb.\n"
 "Strukturovanou komunikaci můžete vybrat jako platební komunikaci v nastavení Fakturace / Účetnictví.\n"
 "Jsou navrženy dva algoritmy:\n"
 "\n"
@@ -377,7 +377,7 @@ msgstr ""
 "Poznámka:\n"
 "-----\n"
 "\n"
-"* Fiskální pozice „内 税“ a „外 税“ byly přidány ke zpracování zvláštních požadavků, které by mohly vyplynout z implementace POS. [1] Za normálních okolností je možná nebudete muset použít.\n"
+"* Mapování daní „内 税“ a „外 税“ byly přidány ke zpracování zvláštních požadavků, které by mohly vyplynout z implementace POS. [1] Za normálních okolností je možná nebudete muset použít.\n"
 "\n"
 "[1] Podrobnosti viz https://github.com/odoo/odoo/pull/6470."
 
@@ -521,8 +521,8 @@ msgid ""
 msgstr ""
 "\n"
 "Účetní výkazy pro Německo\n"
-"Obsahuje rozvahu, zisk a ztrátu, DPH a partnerské DPH\n"
-"Přidá také možnosti exportu DATEV do hlavní knihy"
+"Obsahuje Rozvahu, výnosy a náklady, DIČ a partnerské DIČ\n"
+"Přidá také možnosti exportu DATEV do obratovej předvahe"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_lt_reports
@@ -593,8 +593,8 @@ msgstr ""
 "\n"
 "       Účetní zprávy pro Velkou Británii\n"
 "\n"
-"        Umožňuje odeslat daňové hlášení prostřednictvím\n"
-"        MTD-VAT API pro HMRC.\n"
+"        Umožňuje odeslat daňové přiznání prostřednictvím\n"
+"        MTD-DPH API pro HMRC.\n"
 "    "
 
 #. module: base
@@ -630,7 +630,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Umožňuje vygenerovat zkušební zůstatek pro závěrečný záznam.\n"
+"Umožňuje vygenerovat Hlavní knihu pro závěrečný záznam.\n"
 "\n"
 "Hovorově známý jako „Měsíc 13“"
 
@@ -767,8 +767,8 @@ msgstr ""
 "* Seznam dostupných bank v Litvě.\n"
 "* Daňové skupiny.\n"
 "* Nejběžnější litevské daně.\n"
-"* Fiskální pozice.\n"
-"* Značky účtu."
+"* Mapování daní.\n"
+"* Tagy účtu."
 
 #. module: base
 #: model:ir.module.module,description:base.module_helpdesk_fsm
@@ -901,10 +901,11 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Elektronické účetní výkazy\n"
-"- COA\n"
-"- Zkušební zůstatek\n"
-"DIOT Report"
+"        Elektronické účetní výkazy\n"
+"            - COA\n"
+"            - Hlavní kniha\n"
+"        DIOT Report\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_digest_enterprise
@@ -1720,7 +1721,7 @@ msgstr ""
 "\n"
 "Automatické převody účtu\n"
 "===========================\n"
-"Spravujte automatické převody mezi účty."
+"Spravujte automatické přeúčtování mezi účty."
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_generic_auto_transfer_demo
@@ -1734,7 +1735,7 @@ msgstr ""
 "\n"
 "Ukázka automatických převodů účtu\n"
 "================================\n"
-"Ukázková data pro modul automatických převodů účtu"
+"Ukázková data pro modul automatických přeúčtování účtu"
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_be_us_consolidation_demo
@@ -1760,7 +1761,7 @@ msgstr ""
 "\n"
 "Přístupová práva k účetnictví\n"
 "=========================\n"
-"Poskytuje administrátorovi přístup ke všem účetním funkcím, jako jsou položky deníku a účtová osnova.\n"
+"Poskytuje administrátorovi přístup ke všem účetním funkcím, jako jsou účetní deník a účtová osnova.\n"
 "\n"
 "Přiděluje administrátorovi přístupová práva pro účetní aplikaci a pouze uživatelská práva pro Demo uživatele.\n"
 
@@ -1964,14 +1965,14 @@ msgid ""
 "This module is compatible with base_vat module in order to be able to validate VAT numbers for each country that have or not have the possibility to manage multiple identification types.\n"
 msgstr ""
 "\n"
-"Přidejte nový model s názvem „Identifikační typ“, který rozšiřuje funkčnost pole DIČ u partnera a umožňuje uživateli identifikovat (případně fakturovat) ke kontaktům nejen s jejich daňovým identifikačním číslem (DIČ), ale is jinými typy identifikace, jako je národní dokument, cestovní pas, cizí ID atd. S nainstalovaným modulem uvidíte nyní v partnerském formuláři dvě pole:\n"
+"Přidejte nový model s názvem „Identifikační typ“, který rozšiřuje funkčnost pole DIČ u partnera a umožňuje uživateli identifikovat (případně fakturovat) ke kontaktům nejen s jejich daňovým identifikačním číslem (DPH), ale is jinými typy identifikace, jako je národní dokument, cestovní pas, cizí ID atd. S nainstalovaným modulem uvidíte nyní v partnerském formuláři dvě pole:\n"
 "\n"
 "* Identifikační typ\n"
 "* Identifikační číslo\n"
 "\n"
 "Toto chování je běžným požadavkem pro některé země IATAM, jako je Argentina a Chile. Pokud vaše lokalizace splňuje tyto požadavky, musíte se spoléhat na tento modul a ve svém lokalizačním modulu definovat typy identifikace, které se používají ve vaší zemi. Obecně jsou tyto typy identifikace definovány vládními úřady, které regulují fiskální operace. Například:\n"
 "\n"
-"* AFIP v Argentině definuje DNI, CUIT (DIČ pro právnické osoby), CUIL (DIČ pro fyzickou osobu) a dalších 80 platných identifikačních typů.\n"
+"* AFIP v Argentině definuje DNI, CUIT (DPH pro právnické osoby), CUIL (DPH pro fyzickou osobu) a dalších 80 platných identifikačních typů.\n"
 "\n"
 "Každá identifikace obsahuje tyto informace:\n"
 "\n"
@@ -1982,11 +1983,11 @@ msgstr ""
 "* posloupnost: pojďme třídit typy identifikace podle těch, které jsou nejpoužívanější.\n"
 "* aktivní: můžeme aktivovat / deaktivovat identifikace, abychom našim zákazníkům usnadnili\n"
 "\n"
-"Aby byl tento modul kompatibilní pro prostředí s více společnostmi, kde máme společnosti, které tento požadavek nepotřebují / nepodporují, přidali jsme obecné typy identifikace a obecná pravidla pro správu kontaktních informací a pro uživatele transparentní, pokud používají pouze DIČ, jak již víme.\n"
+"Aby byl tento modul kompatibilní pro prostředí s více společnostmi, kde máme společnosti, které tento požadavek nepotřebují / nepodporují, přidali jsme obecné typy identifikace a obecná pravidla pro správu kontaktních informací a pro uživatele transparentní, pokud používají pouze DPH, jak již víme.\n"
 "\n"
 "Obecné identifikace:\n"
 "\n"
-"* DIČ: Fiskální daňové identifikační číslo nebo číslo DPH, ve výchozím nastavení bude vybráno jako typ identifikace, takže uživatel bude muset přidat pouze související číslo k DIČ.\n"
+"* DPH: Fiskální daňové identifikační číslo nebo číslo DPH, ve výchozím nastavení bude vybráno jako typ identifikace, takže uživatel bude muset přidat pouze související číslo k DPH.\n"
 "* Cestovní pas\n"
 "* Cizinec (cizí národní doklad)\n"
 "\n"
@@ -2564,7 +2565,7 @@ msgstr ""
 "=======================================\n"
 "\n"
 "Toto je nejnovější etiopská lokalizace Odoo a skládá se z:\n"
-"- Grafu účtů\n"
+"- Účtová osnova\n"
 "- Struktury daně z přidané hodnoty\n"
 "- Struktury srážkové daně\n"
 "- Výpisů z regionálních států"
@@ -2666,7 +2667,7 @@ msgstr ""
 "\n"
 "Používají se například k přeskupení přijatých šeků před uložením v jedné dávce do banky.\n"
 "Celková vložená částka se pak zobrazí jako jedna transakce na vašem bankovním výpisu.\n"
-"Když budete pokračovat v odsouhlasení, jednoduše vyberte odpovídající dávkovou platbu, aby se všechny platby uvnitř spárovaly."
+"Když budete pokračovat v párování, jednoduše vyberte odpovídající dávkovou platbu, aby se všechny platby uvnitř spárovaly."
 
 #. module: base
 #: model:ir.module.module,description:base.module_l10n_be_hr_payroll
@@ -3566,7 +3567,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Filtruje řádky akcií z widgetu odsouhlasení\n"
+"Filtruje řádky akcií z párování widgetu\n"
 "    "
 
 #. module: base
@@ -5033,7 +5034,7 @@ msgstr ""
 "\n"
 "Odstranění jednoho objektu ve zpracování CODA má za následek odstranění přidružených objektů. Odstraněním souboru CODA obsahujícího více výpisů z účtu budou tyto související výpisy také odstraněny.\n"
 "\n"
-"Namísto ručního přizpůsobení vygenerovaných výpisů z účtu můžete CODA znovu importovat po aktualizaci databáze OpenERP informacemi, které chyběly, aby bylo možné automatické odsouhlasení.\n"
+"Namísto ručního přizpůsobení vygenerovaných výpisů z účtu můžete CODA znovu importovat po aktualizaci databáze OpenERP informacemi, které chyběly, aby bylo možné automatické párování.\n"
 "\n"
 "Poznámka k podpoře CODA V1:\n"
 "~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n"
@@ -5059,7 +5060,7 @@ msgstr ""
 "======================================\n"
 "\n"
 "Tento modul umožňuje importovat soubory CSV do aplikace Odoo: jsou analyzovány a uloženy v lidsky čitelném formátu ve formátu\n"
-"Účetnictví \\ Bankovní a hotovost \\ Bankovní výpisy.\n"
+"Účetnictví \\ Banka a pokladna \\ Bankovní výpisy.\n"
 "\n"
 "Důležitá poznámka\n"
 "---------------------------------------------\n"
@@ -5085,7 +5086,7 @@ msgstr ""
 "======================================\n"
 "\n"
 "Tento modul umožňuje importovat strojově čitelné soubory OFX v Odoo: jsou analyzovány a ukládány v lidském formátu\n"
-"Účetnictví \\ Bankovní a hotovost \\ Bankovní výpisy.\n"
+"Účetnictví \\ Banka a pokladna \\ Bankovní výpisy.\n"
 "\n"
 "Bankovní výpisy mohou být generovány obsahující podmnožinu informací OFX (pouze ty transakční řádky, které jsou vyžadovány pro vytvoření záznamů finančního účetnictví)."
 
@@ -5109,7 +5110,7 @@ msgstr ""
 "======================================\n"
 "\n"
 "Tento modul umožňuje importovat strojově čitelné soubory QIF do Odoo: jsou analyzovány a ukládány v lidském formátu\n"
-"Účetnictví \\ Bankovní a hotovost \\ Bankovní výpisy.\n"
+"Účetnictví \\ Banka a pokladna \\ Bankovní výpisy.\n"
 "\n"
 "Důležitá poznámka\n"
 "---------------------------------------------\n"
@@ -5143,11 +5144,11 @@ msgstr ""
 "\n"
 "Mongolské účetní výkazy.\n"
 "================================================== ==\n"
-"-Zisk a ztráta\n"
+"-Výnosy a náklady\n"
 "-Rozvaha\n"
 "-Cash Flow Flow\n"
-"-VAT Zpráva o splácení\n"
-"- Zpráva o dani z příjmu\n"
+"-DPH Zpráva o splácení\n"
+"- Daňové přiznání\n"
 "\n"
 "Přispěvatel finančních požadavků: Baskhuu Lodoikhuu. BumanIT LLC\n"
 
@@ -5220,7 +5221,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Upozorněte, že v widgetu odsouhlasení existuje odpovídající prodejní objednávka.\n"
+"Upozorněte, že v widgetu párování existuje odpovídající prodejní objednávka.\n"
 "    "
 
 #. module: base
@@ -5920,7 +5921,7 @@ msgstr ""
 "* Definuje šablony DPH pro prodej a nákup \n"
 "* Definuje daňové šablony\n"
 "* Definuje fiskální pozice pro španělskou fiskální legislativu\n"
-"* Definuje daňové zprávy mod 111, 115 a 303\n"
+"* Definuje daňové přiznání mod 111, 115 a 303\n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_web_studio
@@ -6621,7 +6622,7 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Toto je modul pro správu účetního grafu, struktury DPH, fiskální pozice a daňového mapování.\n"
+"Toto je modul pro správu účetního grafu, struktury DIČ, fiskální pozice a daňového mapování.\n"
 "Přidává také registrační číslo pro Rumunsko v Odoo.\n"
 "================================================== ===============================================================\n"
 "\n"
@@ -6664,7 +6665,8 @@ msgstr ""
 "\n"
 "Kanadské účetní grafy a lokalizace.\n"
 "\n"
-"Fiskální pozice\n"
+"Mapování daní\n"
+"\n"
 "----------------\n"
 "\n"
 "Při zvažování použití daní je důležitá provincie, kde dochází k dodávce.\n"
@@ -6746,7 +6748,7 @@ msgstr ""
 "\n"
 "Tento modul se vztahuje na společnosti se sídlem ve Francii. Nevztahuje se na společnosti se sídlem v DOM-TOM (Guadeloupe, Martinik, Guyane, Réunion, Mayotte).\n"
 "\n"
-"Tento lokalizační modul vytváří daně z DPH typu „včetně daně“ pro nákupy (je to zejména nutné, když používáte modul „hr_expense“). Mějte na paměti, že tyto „daně z přidané hodnoty“ nejsou spravovány fiskálními pozicemi poskytnutými tímto modulem (protože je složité spravovat scénáře „vyloučené daně“ i „zahrnuty do daně“ ve fiskálních pozicích).\n"
+"Tento lokalizační modul vytváří daně z DPH typu „včetně daně“ pro nákupy (je to zejména nutné, když používáte modul „hr_expense“). Mějte na paměti, že tyto „daně z přidané hodnoty“ nejsou spravovány mapování daní poskytnutými tímto modulem (protože je složité spravovat scénáře „vyloučené daně“ i „zahrnuty do daně“ ve fiskálních pozicích).\n"
 "\n"
 "Tento lokalizační modul neřeší scénář, když francouzsko-pevninská společnost prodává služby společnosti se sídlem v DOM. Mohli bychom to zvládnout ve fiskálních pozicích, ale vyžadovalo by to rozlišovat mezi „daněmi z produktů“ a daněmi ze služebních daní. Domníváme se, že je příliš „těžké“ mít to ve výchozím nastavení v l10n_fr; společnosti, které prodávají služby společnostem se sídlem v DOM, by měly aktualizovat konfiguraci svých daní a fiskálních pozic ručně.\n"
 "\n"
@@ -6963,6 +6965,9 @@ msgid ""
 "widget.\n"
 "    "
 msgstr ""
+"\n"
+"Tento modul přidává do filtru možnost filtrovat podle kontrolního čísla párování widget.\n"
+"    "
 
 #. module: base
 #: model:ir.module.module,description:base.module_hr_attendance
@@ -7279,7 +7284,7 @@ msgid ""
 "You can track your vendors, customers and other contacts.\n"
 msgstr ""
 "\n"
-"Tento modul poskytuje rychlý přehled adresáře kontaktů, který je přístupný z vaší domovské stránky. Můžete sledovat prodejce, zákazníky a další kontakty. \n"
+"Tento modul poskytuje rychlý přehled adresáře kontaktů, který je přístupný z vaší domovské stránky. Můžete sledovat dodavatelé, zákazníky a další kontakty. \n"
 
 #. module: base
 #: model:ir.module.module,description:base.module_base_setup
@@ -7846,18 +7851,18 @@ msgid ""
 "    "
 msgstr ""
 "\n"
-"Ověření DIČ pro partnery s DIČ.\n"
+"Ověření DPH pro partnery s DPH.\n"
 "=========================================\n"
 "\n"
-"Po instalaci tohoto modulu budou hodnoty zadané do pole DIČ partnerů\n"
-"ověřeny pro všechny podporované země. Země je odvozena z Dvoumístného kódu země, které má předčíslí DIČ, např. ``BE0477472701`` budou ověřeny podle belgických pravidel.\n"
+"Po instalaci tohoto modulu budou hodnoty zadané do pole DPH partnerů\n"
+"ověřeny pro všechny podporované země. Země je odvozena z Dvoumístného kódu země, které má předčíslí DPH, např. ``BE0477472701`` budou ověřeny podle belgických pravidel.\n"
 "\n"
-"Existují dvě různé úrovně ověření čísla DIČ:\n"
+"Existují dvě různé úrovně ověření čísla DPH:\n"
 "-------------------------------------------------- ------\n"
 "* Ve výchozím nastavení je jednoduchá off-line kontrola prováděna pomocí známé validace pravidla pro zemi, obvykle jednoduchá kontrolní číslice. To je rychlé a vždy k dispozici, ale umožňuje ověřit i čísla, která možná nejsou skutečně přidělena, nebo již neplatí.\n"
 "\n"
-"* Když je povolena možnost „Kontrola DIČ VIES“ (v konfiguraci uživatele\n"
-"Společnost), čísla DIČ budou místo toho zadána do online systému EU VIES databáze, která skutečně ověří, že číslo je platné a aktuálně přidělené společnosti EU. Je to trochu pomalejší než jednoduchá off-line kontrola, vyžaduje připojení k internetu a nemusí být k dispozici po celou dobu. Pokud služba není k dispozici nebo nepodporuje (např. pro země mimo EU), bude místo toho provedena jednoduchá kontrola.\n"
+"* Když je povolena možnost „Kontrola DPH VIES“ (v konfiguraci uživatele\n"
+"Společnost), čísla DPH budou místo toho zadána do online systému EU VIES databáze, která skutečně ověří, že číslo je platné a aktuálně přidělené společnosti EU. Je to trochu pomalejší než jednoduchá off-line kontrola, vyžaduje připojení k internetu a nemusí být k dispozici po celou dobu. Pokud služba není k dispozici nebo nepodporuje (např. pro země mimo EU), bude místo toho provedena jednoduchá kontrola.\n"
 "\n"
 "Mezi podporované země v současnosti patří země EU a několik zemí mimo EU\n"
 "jako je Chile, Kolumbie, Mexiko, Norsko nebo Rusko. Pro nepodporované země\n"
@@ -8995,7 +9000,7 @@ msgstr "Modul pro testování exportu xlsx."
 #. module: base
 #: model:ir.module.module,description:base.module_test_assetsbundle
 msgid "A module to verify the Assets Bundle mechanism."
-msgstr "Modul pro ověření mechanismu balíků aktiv."
+msgstr "Modul pro ověření mechanismu balíků majeteku."
 
 #. module: base
 #: model:ir.module.module,description:base.module_test_inherits_depends
@@ -9025,8 +9030,8 @@ msgid ""
 "A partner with the same <span><span class=\"o_vat_label\">Tax "
 "ID</span></span> already exists ("
 msgstr ""
-"Partner se stejným <span><span class=\"o_vat_label\">daňovým identifikačním "
-"číslem</span></span> již existuje ("
+"Partner se stejným <span><span class=\"o_vat_label\">DIČ </span></span> již "
+"existuje ("
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_partner_merge_automatic_wizard__exclude_contact
@@ -9201,12 +9206,12 @@ msgstr "Přístup k neautorizovaným nebo neplatným společnostem."
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_auto_transfer
 msgid "Account Automatic Transfers"
-msgstr "Automatické převody účtu"
+msgstr "Automatické přeúčtování účtu"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_l10n_generic_auto_transfer_demo
 msgid "Account Automatic Transfers Demo Data"
-msgstr "Demo data automatického převodu účtu"
+msgstr "Demo data automatického přeúčtování účtu"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_account_bank_statement_import
@@ -17131,7 +17136,7 @@ msgstr "V aplikacích"
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_iap
 msgid "In-App Purchases"
-msgstr "Nákupy v aplikacích"
+msgstr "Nákup v aplikácii"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_currency_search
@@ -17847,7 +17852,7 @@ msgstr "Jordánsko"
 #. module: base
 #: model:ir.model.fields,field_description:base.field_base_partner_merge_automatic_wizard__exclude_journal_item
 msgid "Journal Items associated to the contact"
-msgstr "položky Deníku přidružené ke kontaktu"
+msgstr "Účetní deník přidružené ke kontaktu"
 
 #. module: base
 #: model:ir.module.module,shortdesc:base.module_procurement_jit
@@ -19518,7 +19523,7 @@ msgstr "Různé"
 #: model_terms:ir.ui.view,arch_db:base.view_model_fields_form
 #: model_terms:ir.ui.view,arch_db:base.view_model_form
 msgid "Miscellaneous"
-msgstr "Různé"
+msgstr "Účetní zápisy"
 
 #. module: base
 #: model:res.partner.title,name:base.res_partner_title_miss
@@ -21889,7 +21894,7 @@ msgid ""
 " ask the Administrator if you need to merge several contacts linked to "
 "existing Journal Items."
 msgstr ""
-"Pouze cílový kontakt může být propojen s existujícími položkami deníku. "
+"Pouze cílový kontakt může být propojen s existujícími účetními deníkmi. "
 "Požádejte administrátora, že potřebujete sloučit několik kontaktů "
 "propojených s existujícími položkami deníku."
 
@@ -24007,7 +24012,7 @@ msgstr "XML sestavy"
 #: model:ir.module.category,name:base.module_category_accounting_localizations_reporting
 #: model:ir.ui.menu,name:base.reporting_menuitem
 msgid "Reporting"
-msgstr "Sestavy"
+msgstr "Přehledy"
 
 #. module: base
 #: model:ir.module.module,summary:base.module_l10n_ar_reports
@@ -28308,7 +28313,7 @@ msgstr ""
 #. module: base
 #: model:ir.model.fields,field_description:base.field_res_country__vat_label
 msgid "Vat Label"
-msgstr "Štítek DPH"
+msgstr "Štítek DIČ"
 
 #. module: base
 #: model:res.partner.category,name:base.res_partner_category_0
