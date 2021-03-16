@@ -90,6 +90,9 @@ def required_or_default(name, h):
             # add package paths
             if package_paths:
                 d = {"default": ",".join(package_paths)}
+            else:
+                # there are no additional addons
+                d = {"required": False}
 
         if not d:
             d = {"required": True}
