@@ -12,6 +12,7 @@ import time
 import unittest
 import locale
 import psycopg2
+import configparser
 from multiprocessing import Pool
 
 import odoo
@@ -195,7 +196,7 @@ class ConfigCommand(Command):
 
         if params.db_config:
             if os.path.exists(params.db_config):
-                p = ConfigParser.ConfigParser()
+                p = configparser.ConfigParser()
                 try:
                     p.read([params.db_config])
                     for (name, value) in p.items("options"):
@@ -214,13 +215,13 @@ class ConfigCommand(Command):
                                 if not getattr(params, param_name):
                                     setattr(params, param_name, value)
                 except IOError:
-                    _logger.error("Unable to read config %s" %
+                    _logger.error("Unable to read config %s",
                                   params.db_config)
-                except ConfigParser.NoSectionError:
-                    _logger.error("Config %s has no section options" %
+                except configparser.NoSectionError:
+                    _logger.error("Config %s has no section options",
                                   params.db_config)
             else:
-                _logger.error("Config %s not found" % params.db_config)
+                _logger.error("Config %s not found", params.db_config)
 
         if params.module:
             config_args.append("--module")
