@@ -386,6 +386,13 @@ msgid "A Manufacturing Order is already done or cancelled."
 msgstr "生產單已經完成或者被取消."
 
 #. module: mrp
+#: code:addons/mrp/models/stock_warehouse.py:0
+#, python-format
+msgid ""
+"A product with a kit-type bill of materials can not have a reordering rule."
+msgstr ""
+
+#. module: mrp
 #: code:addons/mrp/models/mrp_workcenter.py:0
 #, python-format
 msgid "A workcenter cannot be an alternative of itself"
@@ -437,7 +444,7 @@ msgstr "活動狀態"
 #: model:ir.model.fields,field_description:mrp.field_mrp_production__activity_type_icon
 #: model:ir.model.fields,field_description:mrp.field_mrp_unbuild__activity_type_icon
 msgid "Activity Type Icon"
-msgstr ""
+msgstr "活動類型圖標"
 
 #. module: mrp
 #: model_terms:ir.ui.view,arch_db:mrp.mrp_workcenter_block_wizard_form
@@ -3072,6 +3079,12 @@ msgid "Plastic Laminate"
 msgstr "塑膠層壓板"
 
 #. module: mrp
+#: code:addons/mrp/models/stock_move.py:0
+#, python-format
+msgid "Please delete the Manufacture Order first."
+msgstr ""
+
+#. module: mrp
 #: model:product.product,name:mrp.product_product_wood_ply
 #: model:product.template,name:mrp.product_product_wood_ply_product_template
 msgid "Ply Layer"
@@ -4983,6 +4996,14 @@ msgid ""
 "You can either upload a file from your computer or copy/paste an internet "
 "link to your file."
 msgstr "您可以從您的電腦上傳一個文件或者複製/粘貼一個網路鏈接到您的文件。"
+
+#. module: mrp
+#: code:addons/mrp/models/mrp_bom.py:0
+#, python-format
+msgid ""
+"You can not create a kit-type bill of materials for products that have at "
+"least one reordering rule."
+msgstr ""
 
 #. module: mrp
 #: code:addons/mrp/models/mrp_bom.py:0
