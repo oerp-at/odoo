@@ -593,7 +593,7 @@ msgstr "Numero conto"
 #: model_terms:ir.ui.view,arch_db:website_sale.cart_lines
 #: model_terms:ir.ui.view,arch_db:website_sale.product_quantity
 msgid "Add one"
-msgstr "Aggiungi una unità"
+msgstr "Aggiungi unità"
 
 #. module: website_sale
 #. openerp-web
@@ -2402,7 +2402,7 @@ msgstr "Rimuovi dal carrello"
 #: model_terms:ir.ui.view,arch_db:website_sale.cart_lines
 #: model_terms:ir.ui.view,arch_db:website_sale.product_quantity
 msgid "Remove one"
-msgstr "Rimuovi una unità"
+msgstr "Rimuovi unità"
 
 #. module: website_sale
 #: model:ir.ui.menu,name:website_sale.menu_reporting
@@ -2455,8 +2455,8 @@ msgstr "Colore testo del nastro"
 
 #. module: website_sale
 #: model_terms:ir.ui.view,arch_db:website_sale.snippet_options
-msgid "Right"
-msgstr "Destra"
+msgid "Right (only on grid view)"
+msgstr ""
 
 #. module: website_sale
 #: model:ir.model.fields,field_description:website_sale.field_product_public_category__is_seo_optimized

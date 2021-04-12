@@ -8591,6 +8591,12 @@ msgid "Original Bills"
 msgstr "Orijinal Tedarikçi Faturaları"
 
 #. module: account
+#: model_terms:ir.ui.view,arch_db:account.view_move_line_tree
+#: model_terms:ir.ui.view,arch_db:account.view_move_line_tree_grouped
+msgid "Original Currency"
+msgstr ""
+
+#. module: account
 #: model:ir.model.fields,field_description:account.field_account_move_line__payment_id
 msgid "Originator Payment"
 msgstr "Üretici Ödemesi"
@@ -12404,6 +12410,13 @@ msgstr ""
 "gönderilmez."
 
 #. module: account
+#: code:addons/account/models/account_reconcile_model.py:0
+#, python-format
+msgid ""
+"The following regular expression is invalid to create a partner mapping: %s"
+msgstr ""
+
+#. module: account
 #: code:addons/account/models/chart_template.py:0
 #, python-format
 msgid ""
@@ -14889,6 +14902,15 @@ msgstr "vergi aracı-grup-özel-alan için teknik alan"
 #: model:ir.model.fields,help:account.field_account_bank_statement__previous_statement_id
 msgid "technical field to compute starting balance correctly"
 msgstr "başlangıç dengesini doğru hesaplamak için teknik alan"
+
+#. module: account
+#: code:addons/account/models/account_move.py:0
+#, python-format
+msgid ""
+"The chosen journal has a type that is not compatible with your invoice type."
+" Sales operations should go to 'sale' journals, and purchase operations to "
+"'purchase' ones."
+msgstr ""
 
 #. module: account
 #: model_terms:ir.ui.view,arch_db:account.view_partner_property_form

@@ -7,7 +7,7 @@
 # Martin Trigaux, 2020
 # sejun huang <sejun.huang@gmail.com>, 2020
 # zhengwei wu <wzw15199@gmail.com>, 2020
-# 敬雲 林 <chingyun@yuanchih-consult.com>, 2020
+# 敬雲 林 <chingyun@yuanchih-consult.com>, 2021
 # Mandy Choy <mnc@odoo.com>, 2021
 # 
 msgid ""
@@ -8310,6 +8310,14 @@ msgid ""
 "                                <b attrs=\"{'invisible': [('type', '!=', False)]}\">Address</b>\n"
 "                            </span>"
 msgstr ""
+"<span class=\"o_form_label o_td_label\" name=\"address_name\">\n"
+"                                <b attrs=\"{'invisible': [('type', '!=', 'contact')]}\">公司地址</b>\n"
+"                                <b attrs=\"{'invisible': [('type', '!=', 'invoice')]}\">發票地址</b>\n"
+"                                <b attrs=\"{'invisible': [('type', '!=', 'delivery')]}\">收貨地址</b>\n"
+"                                <b attrs=\"{'invisible': [('type', '!=', 'other')]}\">其他地址</b>\n"
+"                                <b attrs=\"{'invisible': [('type', '!=', 'private')]}\">家庭地址</b>\n"
+"                                <b attrs=\"{'invisible': [('type', '!=', False)]}\">地址</b>\n"
+"                            </span>"
 
 #. module: base
 #: model_terms:ir.ui.view,arch_db:base.view_base_module_update
@@ -20069,7 +20077,7 @@ msgstr ""
 #: model_terms:ir.ui.view,arch_db:base.view_groups_form
 #: model_terms:ir.ui.view,arch_db:base.view_model_form
 msgid "Notes"
-msgstr "待辦事項"
+msgstr "備註"
 
 #. module: base
 #: model:ir.model.fields,field_description:base.field_ir_module_category__module_nr
@@ -21806,6 +21814,16 @@ msgid ""
 msgstr ""
 
 #. module: base
+#: code:addons/base/models/ir_actions_report.py:0
+#, python-format
+msgid ""
+"Odoo is unable to merge the PDFs attached to the following records:\n"
+"%s\n"
+"\n"
+"Please exclude them from the selection to continue. It's possible to still retrieve those PDFs by selecting each of the affected records individually, which will avoid merging."
+msgstr ""
+
+#. module: base
 #: model:ir.module.module,shortdesc:base.module_odoo_referral
 msgid "Odoo referral program"
 msgstr ""
@@ -22909,7 +22927,7 @@ msgstr "樞紐分析表"
 #. module: base
 #: model:ir.module.module,summary:base.module_project_forecast
 msgid "Plan your resources on project tasks"
-msgstr ""
+msgstr "規劃項目任務的資源"
 
 #. module: base
 #: model:ir.module.category,name:base.module_category_human_resources_planning
@@ -26480,6 +26498,12 @@ msgstr "國家全名。"
 #: model:ir.model.fields,help:base.field_res_users__user_id
 msgid "The internal user in charge of this contact."
 msgstr "負責此聯繫人的內部使用者。"
+
+#. module: base
+#: code:addons/base/models/res_country.py:106
+#, python-format
+msgid "The layout contains an invalid format key"
+msgstr ""
 
 #. module: base
 #: model:ir.model.fields,help:base.field_ir_model__inherited_model_ids

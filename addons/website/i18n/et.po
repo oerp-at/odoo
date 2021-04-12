@@ -10,11 +10,11 @@
 # Egon Raamat <egon@avalah.ee>, 2020
 # Martin Aavastik <martin@avalah.ee>, 2020
 # Martin Trigaux, 2020
-# Eneli Õigus <enelioigus@gmail.com>, 2020
 # Maidu Targama <m.targama@gmail.com>, 2020
 # Piia Paurson <piia@avalah.ee>, 2020
-# atriine <triine@avalah.ee>, 2021
+# Triine Aavik <triine@avalah.ee>, 2021
 # Andre Roomet <andreroomet@gmail.com>, 2021
+# Eneli Õigus <enelioigus@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
@@ -22,7 +22,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2020-12-04 15:13+0000\n"
 "PO-Revision-Date: 2020-09-07 08:20+0000\n"
-"Last-Translator: Andre Roomet <andreroomet@gmail.com>, 2021\n"
+"Last-Translator: Eneli Õigus <enelioigus@gmail.com>, 2021\n"
 "Language-Team: Estonian (https://www.transifex.com/odoo/teams/41243/et/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -395,9 +395,7 @@ msgstr ""
 #. openerp-web
 #: code:addons/website/static/src/js/tours/tour_utils.js:0
 #, python-format
-msgid ""
-"<b>Click</b> on this option to change the ${optionTooltipLabel} of the "
-"block."
+msgid "<b>Click</b> on this option to change the %s of the block."
 msgstr ""
 
 #. module: website
@@ -453,8 +451,8 @@ msgstr ""
 #. openerp-web
 #: code:addons/website/static/src/js/tours/tour_utils.js:0
 #, python-format
-msgid "<b>Select</b> a ${optionTooltipLabel}."
-msgstr "<b>Vali</b> a ${optionTooltipLabel}."
+msgid "<b>Select</b> a %s."
+msgstr ""
 
 #. module: website
 #. openerp-web
@@ -467,7 +465,7 @@ msgstr "<b>Vali</b> värvipalett."
 #. openerp-web
 #: code:addons/website/static/src/js/tours/tour_utils.js:0
 #, python-format
-msgid "<b>Slide</b> this button to change the ${direction} padding"
+msgid "<b>Slide</b> this button to change the %s padding"
 msgstr ""
 
 #. module: website
@@ -783,6 +781,8 @@ msgid ""
 "<span class=\"carousel-control-next-icon\"/>\n"
 "                <span class=\"sr-only\">Next</span>"
 msgstr ""
+"<span class=\"carousel-control-next-icon\"/>\n"
+"                <span class=\"sr-only\">Järgmine</span>"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_carousel
@@ -1656,6 +1656,13 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_table_of_content
 msgid "Building blocks system"
+msgstr ""
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/menu/new_content.js:0
+#, python-format
+msgid "Building your %s"
 msgstr ""
 
 #. module: website
@@ -2913,8 +2920,7 @@ msgstr ""
 #: code:addons/website/static/src/js/tours/tour_utils.js:0
 #, python-format
 msgid ""
-"Drag the <b>${snippet.name}</b> building block and drop it at the bottom of "
-"your page."
+"Drag the <b>%s</b> building block and drop it at the bottom of your page."
 msgstr ""
 
 #. module: website
