@@ -94,7 +94,7 @@
     </t>
 </ul>
 <div t-if="signature" t-raw="signature" style="font-size: 13px;"/>
-<p style="color: #555555; margin-top:32px;">
+<!--p style="color: #555555; margin-top:32px;">
     Sent
     <span t-if="company.name">
     by
@@ -105,7 +105,7 @@
     </span>
     using
     <a target="_blank" href="https://www.odoo.com?utm_source=db&amp;utm_medium=email" style="text-decoration:none; color: #875A7B;">Odoo</a>.
-</p>
+</p-->
 </div>
         </template>
 
