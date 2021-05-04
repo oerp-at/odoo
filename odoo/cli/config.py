@@ -13,6 +13,7 @@ import unittest
 import locale
 import psycopg2
 import configparser
+from datetime import datetime
 from multiprocessing import Pool
 
 import odoo
@@ -401,7 +402,8 @@ class Update(ConfigCommand):
 
 class PoIgnoreFileWriter(PoFileWriter):
     def __init__(self, target, modules, lang, ignore):
-        super(PoIgnoreFileWriter, self).__init__(target, modules, lang)
+        super(PoIgnoreFileWriter, self).__init__(target, lang)
+        self.modules = modules
         self.ignore = ignore
 
     def write_rows(self, rows):
@@ -439,6 +441,24 @@ class PoIgnoreFileWriter(PoFileWriter):
             if write_translation:
                 self.add_entry(row['modules'], row['tnrs'], src,
                                row['translation'], row['comments'])
+        
+        import odoo.release as release
+        self.po.header = "Translation of %s.\n" \
+                    "This file contains the translation of the following modules:\n" \
+                    "%s" % (release.description, ''.join("\t* %s\n" % m for m in self.modules))
+        now = datetime.utcnow().strftime('%Y-%m-%d %H:%M+0000')
+        self.po.metadata = {
+            'Project-Id-Version': "%s %s" % (release.description, release.version),
+            'Report-Msgid-Bugs-To': '',
+            'POT-Creation-Date': now,
+            'PO-Revision-Date': now,
+            'Last-Translator': '',
+            'Language-Team': '',
+            'MIME-Version': '1.0',
+            'Content-Type': 'text/plain; charset=UTF-8',
+            'Content-Transfer-Encoding': '',
+            'Plural-Forms': '',
+        }
 
         # buffer expects bytes
         self.buffer.write(str(self.po).encode())
@@ -539,9 +559,7 @@ class Po_Import(Po_Export):
         cr = env.cr
         odoo.tools.trans_load(cr,
                               importFilename,
-                              self.lang,
-                              module_name=self.params.module,
-                              context=context)
+                              self.lang)
         cr.commit()
 
 
